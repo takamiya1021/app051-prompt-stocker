@@ -3,8 +3,8 @@
 ## ゴール
 生成画像からプロンプトを探せる「ビジュアル検索型」プロンプト管理ツールの構築
 
-> [!NOTE]
-> **TDD（Red-Green-Refactor）** でユニットテストを先に書いてから実装
+> [!IMPORTANT]
+> **TDD（Red-Green-Refactor）** でユニットテストを先に書いてから実装する
 
 ---
 
@@ -13,48 +13,95 @@
 | 項目 | ツール |
 |------|--------|
 | テストフレームワーク | Jest + jsdom |
+| E2Eテスト | Playwright（最終動作確認） |
 | フロントエンド | HTML/CSS/JavaScript（Vanilla） |
 | データ保存 | IndexedDB + LocalStorage |
 
 ---
 
-## 実装フェーズ
+## ファイル構成
 
-### Phase 0: テスト環境構築 ✅
-- [x] npm init
-- [x] Jest + jsdom インストール
-- [x] jest.config.js 作成
-
-### Phase 1: データベースモジュール（TDD）✅
-- [x] 🔴🟢🔵 generateId（2テスト）
-- [x] 🔴🟢🔵 LocalStorage CRUD（6テスト）
-- [x] IndexedDB 画像保存（実装済み）
-
-### Phase 2: UIモジュール（TDD）✅
-- [x] 🔴🟢🔵 カード生成（3テスト）
-- [x] 🔴🟢🔵 モーダル制御（3テスト）
-- [x] 🔴🟢🔵 その他UI（9テスト）
-
-### Phase 3: アプリロジック（TDD）✅
-- [x] 🔴🟢🔵 フィルタリング（5テスト）
-- [x] 🔴🟢🔵 検索（3テスト）
-
-### Phase 4: 統合・動作確認 ✅
-- [x] ブラウザで動作確認
-- [x] 新規登録→表示→トースト
+```
+app051-prompt-stocker/
+├── index.html
+├── style.css
+├── manifest.json
+├── sw.js
+├── js/
+│   ├── db.js
+│   ├── ui.js
+│   └── app.js
+├── __tests__/
+│   ├── db.test.js
+│   ├── ui.test.js
+│   └── app.test.js
+├── package.json
+└── jest.config.js
+```
 
 ---
 
-## テスト結果
+## 実装フェーズ
 
+### Phase 0: テスト環境構築 [x]
+- [x] npm init
+- [x] Jest + jsdom インストール
+- [x] jest.config.js 作成
+- [x] テスト実行確認
+
+### Phase 1: データベースモジュール（TDD） [x]
+- [x] 🔴 Red: generateId テスト
+- [x]  Green: generateId 実装
+- [x] 🔵 Refactor
+- [x] 🔴 Red: LocalStorage CRUD テスト
+- [x] 🟢 Green: LocalStorage CRUD 実装
+- [x] 🔵 Refactor
+- [x] 🔴 Red: IndexedDB 画像保存テスト
+- [x] 🟢 Green: IndexedDB 画像保存実装
+- [x] 🔵 Refactor
+
+### Phase 2: UIモジュール（TDD） [x]
+- [x] 🔴 Red: カード生成テスト
+- [x]  Green: カード生成実装
+- [x] 🔵 Refactor
+- [x] 🔴 Red: モーダル制御テスト
+- [x]  Green: モーダル制御実装
+- [x] 🔵 Refactor
+
+### Phase 3: アプリケーションロジック（TDD） [x]
+- [x] 🔴 Red: フィルタリングテスト
+- [x]  Green: フィルタリング実装
+- [x] 🔵 Refactor
+- [x] 🔴 Red: 検索テスト
+- [x] 🟢 Green: 検索実装
+- [x] 🔵 Refactor
+
+### Phase 4: E2E動作確認 [x]
+- [x] Playwright でユーザー操作テスト
+
+### Phase 5: UI改善・不具合修正 [x]
+- [x] ラベル修正（「画像生成」→「画像」） [index.html, js/ui.js]
+- [x] 画像アップロードUIの改善（プレビュー表示位置） [index.html, style.css, js/app.js]
+- [x] タグ入力時の自動補完（datalist） [index.html, js/app.js]
+- [x] PWAの完全実装
+    - [x] icons/ ディレクトリ作成
+    - [x] アイコン画像生成（Android用/iOS用）
+    - [x] manifest.json 作成
+    - [x] sw.js 作成（キャッシング戦略実装）
+    - [x] index.html のPWAメタタグ修正
+    - [x] js/app.js のSW登録パス修正（相対パス化）
+
+---
+
+## 検証計画
+
+### ユニットテスト（Jest）
+```bash
+npm test
 ```
-Tests: 31 passed ✅
-```
+- 全テストパス
+- カバレッジ80%以上
 
-## ブラウザ動作確認
-
-- ✅ 新規登録モーダル表示
-- ✅ プロンプト入力・タグ入力
-- ✅ 保存後カード表示
-- ✅ タグクラウド更新
-- ✅ トースト通知表示
+### E2E（Playwright）
+- プロンプト登録→検索→コピーの一連操作
+- オフライン動作確認
