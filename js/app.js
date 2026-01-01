@@ -91,6 +91,7 @@ const App = {
             detailModal: document.getElementById('detailModal'),
             promptForm: document.getElementById('promptForm'),
             promptId: document.getElementById('promptId'),
+            promptTitle: document.getElementById('promptTitle'), // Added
             promptText: document.getElementById('promptText'),
             categorySelect: document.getElementById('categorySelect'),
             tagsInput: document.getElementById('tagsInput'),
@@ -157,30 +158,37 @@ const App = {
             });
         }
 
-        // ギャラリークリック
-        // ギャラリークリック（アクションボタン処理）
+        // ギャラリークリック（アクションボタン対応）
         if (this.elements.gallery) {
             this.elements.gallery.addEventListener('click', (e) => {
-                const btn = e.target.closest('.action-btn');
-                if (!btn) return; // ボタン以外は何もしない
+                const actionBtn = e.target.closest('[data-action]');
+                if (!actionBtn) return; // アクションボタン以外は無視
 
                 e.stopPropagation();
-                const card = btn.closest('.prompt-card');
-                const id = card.dataset.id;
-                const action = btn.dataset.action;
+                const card = actionBtn.closest('.prompt-card');
+                if (!card) return;
 
-                if (action === 'copy') {
-                    const prompt = DB.getPrompts().find(p => p.id === id);
-                    if (prompt && typeof UI !== 'undefined') {
-                        UI.copyToClipboard(prompt.text);
-                        UI.showToast('📋 コピーしました');
-                    }
-                } else if (action === 'edit') {
-                    this.openEditModal(id);
-                } else if (action === 'delete') {
-                    this.deletePrompt(id);
-                } else if (action === 'favorite') {
-                    this.toggleFavorite(id);
+                const promptId = card.dataset.id;
+                const action = actionBtn.dataset.action;
+
+                switch (action) {
+                    case 'copy':
+                        const prompts = typeof DB !== 'undefined' ? DB.getPrompts() : [];
+                        const prompt = prompts.find(p => p.id === promptId);
+                        if (prompt && typeof UI !== 'undefined') {
+                            UI.copyToClipboard(prompt.text);
+                            UI.showToast('📋 コピーしました！');
+                        }
+                        break;
+                    case 'edit':
+                        this.openEditModal(promptId);
+                        break;
+                    case 'delete':
+                        this.deletePrompt(promptId);
+                        break;
+                    case 'favorite':
+                        this.toggleFavorite(promptId);
+                        break;
                 }
             });
         }
@@ -267,6 +275,8 @@ const App = {
                     document.documentElement.style.setProperty('--card-max-height', val + 'px');
                     if (heightValue) heightValue.textContent = val + 'px';
                 }
+                // 高さ変更後にトランケーション状態を再チェック
+                this.checkTextTruncation();
             };
 
             heightSlider.addEventListener('input', updateHeight);
@@ -274,6 +284,120 @@ const App = {
 
             // 初期状態反映
             updateHeight();
+        }
+
+        // テーマ切替（ライト/ダークモード）
+        const themeToggle = document.getElementById('themeToggle');
+        if (themeToggle) {
+            // 保存済みテーマの復元
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+                themeToggle.checked = true;
+            }
+
+            themeToggle.addEventListener('change', () => {
+                if (themeToggle.checked) {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                    localStorage.setItem('theme', 'light');
+                } else {
+                    document.documentElement.removeAttribute('data-theme');
+                    localStorage.setItem('theme', 'dark');
+                }
+            });
+        }
+
+        // 設定モーダルを開く
+        const openSettingsBtn = document.getElementById('openSettingsBtn');
+        if (openSettingsBtn) {
+            openSettingsBtn.addEventListener('click', () => {
+                if (typeof UI !== 'undefined') UI.openModal('settingsModal');
+            });
+        }
+
+        // 設定モーダル内のAPIキー保存
+        const saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const apiKeyStatus = document.getElementById('apiKeyStatus');
+        const clearApiKeyBtn = document.getElementById('clearApiKeyBtn');
+
+        if (saveApiKeyBtn && apiKeyInput) {
+            // 保存済みキーがあればプレースホルダーを変更
+            if (localStorage.getItem('gemini_api_key')) {
+                apiKeyInput.placeholder = '●●●●●●●●（設定済み）';
+            }
+
+            saveApiKeyBtn.addEventListener('click', () => {
+                const key = apiKeyInput.value.trim();
+                if (key) {
+                    localStorage.setItem('gemini_api_key', key);
+                    apiKeyInput.value = '';
+                    apiKeyInput.placeholder = '●●●●●●●●（設定済み）';
+                    if (apiKeyStatus) {
+                        apiKeyStatus.textContent = '✓ 保存しました';
+                        apiKeyStatus.className = 'api-key-status saved';
+                        setTimeout(() => { apiKeyStatus.textContent = ''; }, 3000);
+                    }
+                    if (typeof UI !== 'undefined') UI.showToast('🔑 APIキーを保存しました');
+                }
+            });
+        }
+
+        // APIキー削除
+        if (clearApiKeyBtn) {
+            clearApiKeyBtn.addEventListener('click', () => {
+                localStorage.removeItem('gemini_api_key');
+                if (apiKeyInput) apiKeyInput.placeholder = 'AIza...';
+                if (apiKeyStatus) {
+                    apiKeyStatus.textContent = '削除しました';
+                    apiKeyStatus.className = 'api-key-status error';
+                    setTimeout(() => { apiKeyStatus.textContent = ''; }, 3000);
+                }
+                if (typeof UI !== 'undefined') UI.showToast('APIキーを削除しました');
+            });
+        }
+
+        // 画像生成ボタン
+        const generateImageBtn = document.getElementById('generateImageBtn');
+        if (generateImageBtn) {
+            generateImageBtn.addEventListener('click', async () => {
+                const promptText = this.elements.promptText?.value;
+
+                if (!promptText || promptText.trim() === '') {
+                    if (typeof UI !== 'undefined') UI.showToast('プロンプトを入力してください', 'error');
+                    return;
+                }
+
+                if (!localStorage.getItem('gemini_api_key')) {
+                    if (typeof UI !== 'undefined') UI.showToast('APIキーを設定してください', 'error');
+                    return;
+                }
+
+                // UI状態切り替え
+                const dropzone = document.getElementById('dropzone');
+                const generating = document.getElementById('imageGenerating');
+                if (dropzone) dropzone.hidden = true;
+                if (generating) generating.hidden = false;
+
+                try {
+                    // 動的インポートで画像生成モジュールを読み込み
+                    const { generateImage } = await import('./imageGen.js');
+                    const blob = await generateImage(promptText);
+
+                    // プレビューに表示
+                    this.showImagePreview(blob);
+                    if (typeof UI !== 'undefined') UI.showToast('🎨 画像を生成しました！');
+
+                } catch (error) {
+                    console.error('画像生成エラー:', error);
+                    if (typeof UI !== 'undefined') UI.showToast(error.message || '画像生成に失敗しました', 'error');
+
+                    // ドロップゾーンを戻す
+                    if (dropzone) dropzone.hidden = false;
+                } finally {
+                    if (generating) generating.hidden = true;
+                }
+            });
         }
     },
 
@@ -319,6 +443,25 @@ const App = {
                 this.elements.gallery.appendChild(card);
             }
         }
+
+        // テキストがはみ出ているかチェックして「...」表示用クラスを追加
+        this.checkTextTruncation();
+    },
+
+    /**
+     * テキストのオーバーフローをチェックして .truncated クラスを付与
+     */
+    checkTextTruncation() {
+        if (!this.elements.gallery) return;
+
+        this.elements.gallery.querySelectorAll('.prompt-card__text').forEach(textEl => {
+            // scrollHeight > clientHeight なら溢れている
+            if (textEl.scrollHeight > textEl.clientHeight) {
+                textEl.classList.add('truncated');
+            } else {
+                textEl.classList.remove('truncated');
+            }
+        });
     },
 
     /**
@@ -366,6 +509,24 @@ const App = {
     },
 
     /**
+     * 新規登録モーダルを開く
+     */
+    openAddModal() {
+        this.state.editingPromptId = null;
+        if (this.elements.promptId) this.elements.promptId.value = '';
+        if (this.elements.promptTitle) this.elements.promptTitle.value = '';
+        if (this.elements.promptText) this.elements.promptText.value = '';
+        if (this.elements.categorySelect) this.elements.categorySelect.value = 'image';
+        if (this.elements.tagsInput) this.elements.tagsInput.value = '';
+        if (this.elements.favoriteCheck) this.elements.favoriteCheck.checked = false;
+
+        this.removeImage();
+        this.updateTagSuggestions();
+
+        if (typeof UI !== 'undefined') UI.openModal('editModal');
+    },
+
+    /**
      * 編集モーダルを開く
      */
     async openEditModal(id = null) {
@@ -382,6 +543,7 @@ const App = {
             if (prompt) {
                 if (this.elements.modalTitle) this.elements.modalTitle.textContent = 'プロンプト編集';
                 if (this.elements.promptId) this.elements.promptId.value = prompt.id;
+                if (this.elements.promptTitle) this.elements.promptTitle.value = prompt.title || ''; // Added
                 if (this.elements.promptText) this.elements.promptText.value = prompt.text;
                 if (this.elements.categorySelect) this.elements.categorySelect.value = prompt.category;
                 if (this.elements.tagsInput) this.elements.tagsInput.value = prompt.tags ? prompt.tags.join(', ') : '';
@@ -448,6 +610,7 @@ const App = {
 
         const prompt = {
             id,
+            title: this.elements.promptTitle ? this.elements.promptTitle.value : '',
             text: this.elements.promptText.value,
             category: this.elements.categorySelect.value,
             tags,

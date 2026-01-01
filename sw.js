@@ -1,4 +1,4 @@
-const CACHE_NAME = 'prompt-stocker-v1';
+const CACHE_NAME = 'prompt-stocker-v2';
 const ASSETS = [
     './',
     './index.html',
@@ -32,11 +32,19 @@ self.addEventListener('activate', (event) => {
     );
 });
 
-// フェッチ時にキャッシュを優先
+// ネットワーク優先 (Network First) 戦略
 self.addEventListener('fetch', (event) => {
     event.respondWith(
-        caches.match(event.request).then((response) => {
-            return response || fetch(event.request);
+        fetch(event.request).then((response) => {
+            // 成功したレスポンスをキャッシュに保存
+            const responseClone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+                cache.put(event.request, responseClone);
+            });
+            return response;
+        }).catch(() => {
+            // オフライン時はキャッシュから返す
+            return caches.match(event.request);
         })
     );
 });
