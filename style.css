@@ -561,6 +561,11 @@ select.form-control {
 /* Image Upload */
 .image-upload {
     position: relative;
+    min-height: 180px;
+}
+
+.image-upload [hidden] {
+    display: none !important;
 }
 
 .image-upload__dropzone {
@@ -575,6 +580,7 @@ select.form-control {
     text-align: center;
     color: var(--color-text-muted);
     transition: all var(--transition-fast);
+    min-height: 180px;
 }
 
 .image-upload__dropzone.dragover {
@@ -586,17 +592,19 @@ select.form-control {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 12px;
-    padding: 20px;
+    padding: 10px;
     border: 2px solid var(--color-border);
     border-radius: var(--radius-md);
     background-color: var(--color-bg-tertiary);
+    min-height: 180px;
 }
 
 .image-upload__preview img {
     max-width: 100%;
-    max-height: 200px;
-    border-radius: var(--radius-md);
+    max-height: 160px;
+    border-radius: var(--radius-sm);
     object-fit: contain;
 }
 

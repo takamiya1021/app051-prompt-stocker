@@ -100,6 +100,7 @@ const App = {
             imagePreview: document.getElementById('imagePreview'),
             previewImg: document.getElementById('previewImg'),
             modalTitle: document.getElementById('modalTitle'),
+            tagSuggestions: document.getElementById('tagSuggestions'),
             exportBtn: document.getElementById('exportBtn'),
             importBtn: document.getElementById('importBtn'),
             importFile: document.getElementById('importFile')
@@ -354,9 +355,11 @@ const App = {
                 }
             }
         } else {
-            if (this.elements.modalTitle) this.elements.modalTitle.textContent = '新規プロンプト登録';
             if (this.elements.promptId) this.elements.promptId.value = '';
         }
+
+        // タグの補完リストを更新
+        this.updateTagSuggestions();
 
         if (typeof UI !== 'undefined') UI.openModal('editModal');
     },
@@ -549,6 +552,18 @@ const App = {
         }
 
         e.target.value = '';
+    },
+
+    /**
+     * タグ入力の補完リストを更新
+     */
+    updateTagSuggestions() {
+        if (!this.elements.tagSuggestions || typeof DB === 'undefined') return;
+
+        const tags = DB.getAllTags();
+        this.elements.tagSuggestions.innerHTML = tags
+            .map(tag => `<option value="${tag}">`)
+            .join('');
     },
 
     /**
