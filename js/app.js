@@ -91,6 +91,7 @@ const App = {
             detailModal: document.getElementById('detailModal'),
             promptForm: document.getElementById('promptForm'),
             promptId: document.getElementById('promptId'),
+            promptTitle: document.getElementById('promptTitle'), // Added
             promptText: document.getElementById('promptText'),
             categorySelect: document.getElementById('categorySelect'),
             tagsInput: document.getElementById('tagsInput'),
@@ -157,19 +158,38 @@ const App = {
             });
         }
 
-        // ギャラリークリック
+        // ギャラリークリック（アクションボタン対応）
         if (this.elements.gallery) {
             this.elements.gallery.addEventListener('click', (e) => {
-                const favoriteBtn = e.target.closest('[data-action="favorite"]');
-                if (favoriteBtn) {
-                    e.stopPropagation();
-                    const card = favoriteBtn.closest('.prompt-card');
-                    this.toggleFavorite(card.dataset.id);
-                    return;
-                }
+                const actionBtn = e.target.closest('[data-action]');
+                if (!actionBtn) return; // アクションボタン以外は無視
 
-                const card = e.target.closest('.prompt-card');
-                if (card) this.openDetailModal(card.dataset.id);
+                e.stopPropagation();
+                const card = actionBtn.closest('.prompt-card');
+                if (!card) return;
+
+                const promptId = card.dataset.id;
+                const action = actionBtn.dataset.action;
+
+                switch (action) {
+                    case 'copy':
+                        const prompts = typeof DB !== 'undefined' ? DB.getPrompts() : [];
+                        const prompt = prompts.find(p => p.id === promptId);
+                        if (prompt && typeof UI !== 'undefined') {
+                            UI.copyToClipboard(prompt.text);
+                            UI.showToast('📋 コピーしました！');
+                        }
+                        break;
+                    case 'edit':
+                        this.openEditModal(promptId);
+                        break;
+                    case 'delete':
+                        this.deletePrompt(promptId);
+                        break;
+                    case 'favorite':
+                        this.toggleFavorite(promptId);
+                        break;
+                }
             });
         }
 
@@ -237,6 +257,34 @@ const App = {
         if (this.elements.importFile) {
             this.elements.importFile.addEventListener('change', (e) => this.importData(e));
         }
+
+        // 高さ制限スライダー
+        const heightSlider = document.getElementById('heightSlider');
+        const unlimitedHeight = document.getElementById('unlimitedHeight');
+        const heightValue = document.getElementById('heightValue');
+
+        if (heightSlider && unlimitedHeight) {
+            const updateHeight = () => {
+                if (unlimitedHeight.checked) {
+                    heightSlider.disabled = true;
+                    document.documentElement.style.setProperty('--card-max-height', 'none');
+                    if (heightValue) heightValue.textContent = '全表示';
+                } else {
+                    heightSlider.disabled = false;
+                    const val = heightSlider.value;
+                    document.documentElement.style.setProperty('--card-max-height', val + 'px');
+                    if (heightValue) heightValue.textContent = val + 'px';
+                }
+                // 高さ変更後にトランケーション状態を再チェック
+                this.checkTextTruncation();
+            };
+
+            heightSlider.addEventListener('input', updateHeight);
+            unlimitedHeight.addEventListener('change', updateHeight);
+
+            // 初期状態反映
+            updateHeight();
+        }
     },
 
     /**
@@ -281,6 +329,25 @@ const App = {
                 this.elements.gallery.appendChild(card);
             }
         }
+
+        // テキストがはみ出ているかチェックして「...」表示用クラスを追加
+        this.checkTextTruncation();
+    },
+
+    /**
+     * テキストのオーバーフローをチェックして .truncated クラスを付与
+     */
+    checkTextTruncation() {
+        if (!this.elements.gallery) return;
+
+        this.elements.gallery.querySelectorAll('.prompt-card__text').forEach(textEl => {
+            // scrollHeight > clientHeight なら溢れている
+            if (textEl.scrollHeight > textEl.clientHeight) {
+                textEl.classList.add('truncated');
+            } else {
+                textEl.classList.remove('truncated');
+            }
+        });
     },
 
     /**
@@ -328,6 +395,24 @@ const App = {
     },
 
     /**
+     * 新規登録モーダルを開く
+     */
+    openAddModal() {
+        this.state.editingPromptId = null;
+        if (this.elements.promptId) this.elements.promptId.value = '';
+        if (this.elements.promptTitle) this.elements.promptTitle.value = '';
+        if (this.elements.promptText) this.elements.promptText.value = '';
+        if (this.elements.categorySelect) this.elements.categorySelect.value = 'image';
+        if (this.elements.tagsInput) this.elements.tagsInput.value = '';
+        if (this.elements.favoriteCheck) this.elements.favoriteCheck.checked = false;
+
+        this.removeImage();
+        this.updateTagSuggestions();
+
+        if (typeof UI !== 'undefined') UI.openModal('editModal');
+    },
+
+    /**
      * 編集モーダルを開く
      */
     async openEditModal(id = null) {
@@ -344,6 +429,7 @@ const App = {
             if (prompt) {
                 if (this.elements.modalTitle) this.elements.modalTitle.textContent = 'プロンプト編集';
                 if (this.elements.promptId) this.elements.promptId.value = prompt.id;
+                if (this.elements.promptTitle) this.elements.promptTitle.value = prompt.title || ''; // Added
                 if (this.elements.promptText) this.elements.promptText.value = prompt.text;
                 if (this.elements.categorySelect) this.elements.categorySelect.value = prompt.category;
                 if (this.elements.tagsInput) this.elements.tagsInput.value = prompt.tags ? prompt.tags.join(', ') : '';
@@ -399,6 +485,7 @@ const App = {
 
         const prompt = {
             id,
+            title: this.elements.promptTitle ? this.elements.promptTitle.value : '',
             text: this.elements.promptText.value,
             category: this.elements.categorySelect.value,
             tags,

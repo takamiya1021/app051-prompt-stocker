@@ -172,6 +172,9 @@ body {
 
 .sidebar__tags {
     margin-bottom: 32px;
+    max-height: 200px;
+    /* Fixed height, independent of card height setting */
+    overflow-y: auto;
 }
 
 .sidebar__actions {
@@ -236,6 +239,36 @@ body {
     color: var(--color-text-primary);
 }
 
+/* Sidebar Settings */
+.sidebar__settings {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--color-border);
+}
+
+.setting-item {
+    margin-bottom: 12px;
+}
+
+.setting-label {
+    display: block;
+    font-size: 0.8rem;
+    margin-bottom: 6px;
+    color: var(--color-text-secondary);
+}
+
+.setting-item input[type="range"] {
+    width: 100%;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+}
+
 /* ========================================
    Gallery (Pinterest-style Grid)
    ======================================== */
@@ -246,6 +279,8 @@ body {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 20px;
     align-content: start;
+    align-items: start;
+    /* Prevent cards from stretching to row height */
 }
 
 .gallery__empty {
@@ -280,23 +315,42 @@ body {
     border-color: var(--color-border-light);
 }
 
+.prompt-card__header {
+    display: flex;
+    align-items: center;
+    /* or start */
+    padding: 16px 16px 0;
+    /* Top/Side padding */
+}
+
 .prompt-card__image {
     width: 100%;
     aspect-ratio: 1 / 1;
     object-fit: cover;
+    border-radius: var(--radius-sm);
     background-color: var(--color-bg-tertiary);
 }
 
 .prompt-card__image--placeholder {
+    width: 100%;
+    aspect-ratio: 1 / 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 3rem;
+    font-size: 1.5rem;
+    /* Smaller icon for smaller view */
     color: var(--color-text-muted);
+    background-color: var(--color-bg-tertiary);
+    border-radius: var(--radius-sm);
+}
+
+.prompt-card__meta {
+    flex: 1;
+    /* padding-left: 12px; handled in inline or here */
 }
 
 .prompt-card__body {
-    padding: 16px;
+    padding: 12px 16px 16px;
 }
 
 .prompt-card__category {
@@ -310,22 +364,54 @@ body {
 }
 
 .prompt-card__text {
-    font-size: 0.85rem;
+    font-size: 1rem;
     color: var(--color-text-secondary);
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
-    -webkit-box-orient: vertical;
+    line-height: 1.6;
+    max-height: var(--card-max-height, none);
     overflow: hidden;
-    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+    position: relative;
+}
+
+/* Ellipsis indicator - only shown when text is truncated (class added by JS) */
+.prompt-card__text.truncated::after {
+    content: "...";
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    padding-left: 20px;
+    background: linear-gradient(to right, transparent, var(--color-bg-secondary) 50%);
 }
 
 .prompt-card__footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 16px;
+    padding: 10px 16px;
     border-top: 1px solid var(--color-border);
+    flex-shrink: 0;
+    flex-grow: 0;
+    gap: 8px;
+}
+
+.prompt-card__footer-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    flex: 1;
+    min-width: 0;
+}
+
+.prompt-card__category {
+    display: inline-block;
+    padding: 4px 8px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    background-color: var(--color-bg-tertiary);
+    border-radius: var(--radius-sm);
+    white-space: nowrap;
 }
 
 .prompt-card__tags {
@@ -339,18 +425,53 @@ body {
     color: var(--color-text-muted);
 }
 
-.prompt-card__favorite {
-    font-size: 1.2rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    opacity: 0.3;
-    transition: opacity var(--transition-fast);
+.prompt-card__actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
 }
 
-.prompt-card__favorite.active,
-.prompt-card__favorite:hover {
+.action-btn {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.9rem;
+    opacity: 0.7;
+    /* Increased from 0.5 for better visibility */
+    transition: all var(--transition-fast);
+}
+
+.action-btn:hover {
     opacity: 1;
+    background-color: var(--color-bg-hover);
+}
+
+.action-btn.favorite-btn {
+    font-size: 1.1rem;
+    /* Larger for favorite icon */
+    color: #888;
+    /* Gray color for unselected state - more visible */
+    opacity: 0.9;
+    /* Higher opacity for better visibility */
+}
+
+.action-btn.favorite-btn:hover {
+    color: #FFD700;
+    /* Gold on hover */
+    opacity: 1;
+}
+
+.action-btn.favorite-btn.active {
+    opacity: 1;
+    color: #FFD700;
+    /* Gold color for active favorite */
 }
 
 /* ========================================

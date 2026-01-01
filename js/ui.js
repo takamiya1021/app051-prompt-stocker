@@ -53,18 +53,32 @@ const UI = {
             : '';
 
         card.innerHTML = `
-      ${imageHtml}
+      <div class="prompt-card__header">
+          <div class="prompt-card__image-container" style="flex: 0 0 50%; max-width: 50%;">
+              ${imageHtml}
+          </div>
+          <div class="prompt-card__meta" style="padding-left: 12px; display: flex; flex-direction: column; justify-content: center;">
+              <div class="prompt-card__title" style="font-weight: 700; font-size: 1.1em;">${this.escapeHtml(prompt.title || '')}</div>
+          </div>
+      </div>
       <div class="prompt-card__body">
-        <div class="prompt-card__category">${this.CATEGORY_LABELS[prompt.category] || prompt.category}</div>
         <p class="prompt-card__text">${this.escapeHtml(prompt.text)}</p>
       </div>
       <div class="prompt-card__footer">
-        <div class="prompt-card__tags">${tagsHtml}</div>
-        <button class="prompt-card__favorite ${prompt.favorite ? 'active' : ''}" data-action="favorite">
-          ${prompt.favorite ? '⭐' : '☆'}
-        </button>
+        <div class="prompt-card__footer-left">
+          <span class="prompt-card__category">${this.CATEGORY_LABELS[prompt.category] || prompt.category}</span>
+          <div class="prompt-card__tags">${tagsHtml}</div>
+        </div>
+        <div class="prompt-card__actions">
+          <button class="action-btn" data-action="copy" title="コピー">📋</button>
+          <button class="action-btn" data-action="edit" title="編集">✏️</button>
+          <button class="action-btn" data-action="delete" title="削除">🗑️</button>
+          <button class="action-btn favorite-btn ${prompt.favorite ? 'active' : ''}" data-action="favorite" title="お気に入り">
+            ${prompt.favorite ? '⭐' : '☆'}
+          </button>
+        </div>
       </div>
-    `;
+        `;
 
         return card;
     },
@@ -122,9 +136,7 @@ const UI = {
     updateTagCloud(tags, activeTag = null) {
         const container = document.getElementById('tagCloud');
         if (container) {
-            container.innerHTML = tags.map(tag => `
-        <span class="tag ${activeTag === tag ? 'active' : ''}" data-tag="${tag}">#${tag}</span>
-      `).join('');
+            container.innerHTML = tags.map(tag => `<span class="tag ${activeTag === tag ? 'active' : ''}" data-tag="${tag}">#${tag}</span>`).join('');
         }
     },
 
@@ -137,7 +149,7 @@ const UI = {
         const toast = document.getElementById('toast');
         if (toast) {
             toast.textContent = message;
-            toast.className = `toast show ${type}`;
+            toast.className = `toast show ${type} `;
 
             setTimeout(() => {
                 toast.classList.remove('show');
@@ -180,9 +192,9 @@ const UI = {
 
         if (imageContainer) {
             if (imageUrl) {
-                imageContainer.innerHTML = `<img src="${imageUrl}" alt="生成画像">`;
+                imageContainer.innerHTML = `< img src = "${imageUrl}" alt = "生成画像" > `;
             } else {
-                imageContainer.innerHTML = `<div class="detail-view__image--placeholder">${this.getCategoryEmoji(prompt.category)}</div>`;
+                imageContainer.innerHTML = `< div class="detail-view__image--placeholder" > ${this.getCategoryEmoji(prompt.category)}</div > `;
             }
         }
 
@@ -196,7 +208,7 @@ const UI = {
 
         if (tagsEl) {
             tagsEl.innerHTML = prompt.tags && prompt.tags.length
-                ? prompt.tags.map(tag => `<span class="tag">#${tag}</span>`).join('')
+                ? prompt.tags.map(tag => `< span class="tag" > #${tag}</span > `).join('')
                 : '<span class="tag">タグなし</span>';
         }
 
