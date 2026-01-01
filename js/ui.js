@@ -6,7 +6,7 @@
 const UI = {
     // カテゴリ表示名マッピング
     CATEGORY_LABELS: {
-        image: '🖼️ 画像生成',
+        image: '🖼️ 画像',
         video: '🎬 動画生成',
         chat: '💬 チャット',
         code: '💻 コーディング'
