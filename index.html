@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="生成画像からプロンプトを探せるビジュアル検索型プロンプト管理ツール">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <title>Prompt Stocker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app">
+        <!-- ヘッダー -->
+        <header class="header">
+            <h1 class="header__title">🗃️ Prompt Stocker</h1>
+            <div class="header__actions">
+                <div class="search-box">
+                    <input type="text" id="searchInput" class="search-box__input" placeholder="プロンプトを検索...">
+                </div>
+                <button id="addBtn" class="btn btn--primary">+ 新規登録</button>
+            </div>
+        </header>
+
+        <!-- メインコンテンツ -->
+        <main class="main">
+            <!-- サイドバー -->
+            <aside class="sidebar">
+                <nav class="sidebar__nav">
+                    <h2 class="sidebar__title">カテゴリ</h2>
+                    <ul class="category-list" id="categoryList">
+                        <li class="category-list__item active" data-category="all">📁 すべて</li>
+                        <li class="category-list__item" data-category="image">🖼️ 画像生成</li>
+                        <li class="category-list__item" data-category="video">🎬 動画生成</li>
+                        <li class="category-list__item" data-category="chat">💬 チャット</li>
+                        <li class="category-list__item" data-category="code">💻 コーディング</li>
+                        <li class="category-list__item" data-category="favorite">⭐ お気に入り</li>
+                    </ul>
+                </nav>
+
+                <div class="sidebar__tags">
+                    <h2 class="sidebar__title">タグ</h2>
+                    <div class="tag-cloud" id="tagCloud">
+                        <!-- タグが動的に追加される -->
+                    </div>
+                </div>
+
+                <div class="sidebar__actions">
+                    <button id="exportBtn" class="btn btn--secondary btn--small">📤 エクスポート</button>
+                    <button id="importBtn" class="btn btn--secondary btn--small">📥 インポート</button>
+                    <input type="file" id="importFile" accept=".json" hidden>
+                </div>
+            </aside>
+
+            <!-- ギャラリー -->
+            <section class="gallery" id="gallery">
+                <!-- プロンプトカードが動的に追加される -->
+                <div class="gallery__empty" id="emptyState">
+                    <p>プロンプトがまだありません</p>
+                    <p>「+ 新規登録」から追加してください</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 新規登録・編集モーダル -->
+    <div class="modal" id="editModal">
+        <div class="modal__backdrop"></div>
+        <div class="modal__content">
+            <div class="modal__header">
+                <h2 class="modal__title" id="modalTitle">新規プロンプト登録</h2>
+                <button class="modal__close" id="closeModal">&times;</button>
+            </div>
+            <form class="modal__body" id="promptForm">
+                <input type="hidden" id="promptId">
+
+                <div class="form-group">
+                    <label for="promptText">プロンプト</label>
+                    <textarea id="promptText" class="form-control" rows="6" placeholder="プロンプトを入力..."
+                        required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="categorySelect">カテゴリ</label>
+                    <select id="categorySelect" class="form-control" required>
+                        <option value="image">🖼️ 画像生成</option>
+                        <option value="video">🎬 動画生成</option>
+                        <option value="chat">💬 チャット</option>
+                        <option value="code">💻 コーディング</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="tagsInput">タグ（カンマ区切り）</label>
+                    <input type="text" id="tagsInput" class="form-control" placeholder="例: anime, portrait, sunset">
+                </div>
+
+                <div class="form-group">
+                    <label>生成画像</label>
+                    <div class="image-upload" id="imageUpload">
+                        <div class="image-upload__dropzone" id="dropzone">
+                            <p>📸 画像をドラッグ&ドロップ</p>
+                            <p>または</p>
+                            <button type="button" class="btn btn--secondary" id="selectImageBtn">ファイルを選択</button>
+                            <input type="file" id="imageInput" accept="image/*" hidden>
+                        </div>
+                        <div class="image-upload__preview" id="imagePreview" hidden>
+                            <img id="previewImg" src="" alt="プレビュー">
+                            <button type="button" class="btn btn--danger btn--small" id="removeImageBtn">削除</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group form-group--inline">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="favoriteCheck">
+                        ⭐ お気に入りに追加
+                    </label>
+                </div>
+
+                <div class="modal__footer">
+                    <button type="button" class="btn btn--secondary" id="cancelBtn">キャンセル</button>
+                    <button type="submit" class="btn btn--primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 詳細表示モーダル -->
+    <div class="modal" id="detailModal">
+        <div class="modal__backdrop"></div>
+        <div class="modal__content modal__content--large">
+            <div class="modal__header">
+                <h2 class="modal__title">プロンプト詳細</h2>
+                <button class="modal__close" id="closeDetailModal">&times;</button>
+            </div>
+            <div class="modal__body">
+                <div class="detail-view">
+                    <div class="detail-view__image" id="detailImage">
+                        <!-- 画像が表示される -->
+                    </div>
+                    <div class="detail-view__info">
+                        <div class="detail-view__category" id="detailCategory"></div>
+                        <div class="detail-view__prompt" id="detailPrompt"></div>
+                        <div class="detail-view__tags" id="detailTags"></div>
+                        <div class="detail-view__actions">
+                            <button class="btn btn--primary" id="copyPromptBtn">📋 コピー</button>
+                            <button class="btn btn--secondary" id="editPromptBtn">✏️ 編集</button>
+                            <button class="btn btn--danger" id="deletePromptBtn">🗑️ 削除</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- トースト通知 -->
+    <div class="toast" id="toast"></div>
+
+    <script src="js/db.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>
