@@ -1,6 +1,6 @@
 {
   "name": "app051-prompt-stocker",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "生成画像からプロンプトを探せる「ビジュアル検索型」プロンプト管理ツール",
   "main": "index.js",
   "directories": {

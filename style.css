@@ -3,7 +3,7 @@
    ダークモード・Pinterest風レイアウト
    ======================================== */
 
-/* CSS Variables */
+/* CSS Variables - Dark Mode (Default) */
 :root {
     /* カラーパレット */
     --color-bg-primary: #0f0f0f;
@@ -48,6 +48,25 @@
     --header-height: 64px;
 }
 
+/* CSS Variables - Light Mode */
+html[data-theme="light"] {
+    --color-bg-primary: #f5f5f5;
+    --color-bg-secondary: #ffffff;
+    --color-bg-tertiary: #e8e8e8;
+    --color-bg-hover: #eeeeee;
+
+    --color-text-primary: #1a1a1a;
+    --color-text-secondary: #555555;
+    --color-text-muted: #888888;
+
+    --color-border: #dddddd;
+    --color-border-light: #cccccc;
+
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
 /* Reset & Base */
 *,
 *::before,
@@ -88,7 +107,7 @@ body {
     justify-content: space-between;
     padding: 0 24px;
     height: var(--header-height);
-    background: linear-gradient(180deg, var(--color-bg-secondary) 0%, rgba(26, 26, 26, 0.95) 100%);
+    background-color: var(--color-bg-secondary);
     border-bottom: 1px solid var(--color-border);
     backdrop-filter: blur(10px);
 }
@@ -525,6 +544,82 @@ body {
 .btn--small {
     padding: 6px 12px;
     font-size: 0.8rem;
+}
+
+.btn--accent {
+    color: white;
+    background: linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%);
+    border: none;
+}
+
+.btn--accent:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Spinner */
+.spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--color-border);
+    border-top-color: var(--color-accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Form Control Small (for sidebar) */
+.form-control--small {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+    width: 100%;
+    background-color: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-primary);
+}
+
+.form-control--small:focus {
+    outline: none;
+    border-color: var(--color-accent);
+}
+
+/* API Key Status */
+.api-key-status {
+    font-size: 0.75rem;
+    margin-left: 8px;
+}
+
+.api-key-status.saved {
+    color: var(--color-success);
+}
+
+.api-key-status.error {
+    color: var(--color-danger);
+}
+
+/* Image Upload Buttons */
+.image-upload__buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* Image Generating State */
+.image-upload__generating {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: var(--color-text-muted);
+    gap: 12px;
 }
 
 /* ========================================

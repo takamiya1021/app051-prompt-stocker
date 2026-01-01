@@ -285,6 +285,120 @@ const App = {
             // 初期状態反映
             updateHeight();
         }
+
+        // テーマ切替（ライト/ダークモード）
+        const themeToggle = document.getElementById('themeToggle');
+        if (themeToggle) {
+            // 保存済みテーマの復元
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+                themeToggle.checked = true;
+            }
+
+            themeToggle.addEventListener('change', () => {
+                if (themeToggle.checked) {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                    localStorage.setItem('theme', 'light');
+                } else {
+                    document.documentElement.removeAttribute('data-theme');
+                    localStorage.setItem('theme', 'dark');
+                }
+            });
+        }
+
+        // 設定モーダルを開く
+        const openSettingsBtn = document.getElementById('openSettingsBtn');
+        if (openSettingsBtn) {
+            openSettingsBtn.addEventListener('click', () => {
+                if (typeof UI !== 'undefined') UI.openModal('settingsModal');
+            });
+        }
+
+        // 設定モーダル内のAPIキー保存
+        const saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const apiKeyStatus = document.getElementById('apiKeyStatus');
+        const clearApiKeyBtn = document.getElementById('clearApiKeyBtn');
+
+        if (saveApiKeyBtn && apiKeyInput) {
+            // 保存済みキーがあればプレースホルダーを変更
+            if (localStorage.getItem('gemini_api_key')) {
+                apiKeyInput.placeholder = '●●●●●●●●（設定済み）';
+            }
+
+            saveApiKeyBtn.addEventListener('click', () => {
+                const key = apiKeyInput.value.trim();
+                if (key) {
+                    localStorage.setItem('gemini_api_key', key);
+                    apiKeyInput.value = '';
+                    apiKeyInput.placeholder = '●●●●●●●●（設定済み）';
+                    if (apiKeyStatus) {
+                        apiKeyStatus.textContent = '✓ 保存しました';
+                        apiKeyStatus.className = 'api-key-status saved';
+                        setTimeout(() => { apiKeyStatus.textContent = ''; }, 3000);
+                    }
+                    if (typeof UI !== 'undefined') UI.showToast('🔑 APIキーを保存しました');
+                }
+            });
+        }
+
+        // APIキー削除
+        if (clearApiKeyBtn) {
+            clearApiKeyBtn.addEventListener('click', () => {
+                localStorage.removeItem('gemini_api_key');
+                if (apiKeyInput) apiKeyInput.placeholder = 'AIza...';
+                if (apiKeyStatus) {
+                    apiKeyStatus.textContent = '削除しました';
+                    apiKeyStatus.className = 'api-key-status error';
+                    setTimeout(() => { apiKeyStatus.textContent = ''; }, 3000);
+                }
+                if (typeof UI !== 'undefined') UI.showToast('APIキーを削除しました');
+            });
+        }
+
+        // 画像生成ボタン
+        const generateImageBtn = document.getElementById('generateImageBtn');
+        if (generateImageBtn) {
+            generateImageBtn.addEventListener('click', async () => {
+                const promptText = this.elements.promptText?.value;
+
+                if (!promptText || promptText.trim() === '') {
+                    if (typeof UI !== 'undefined') UI.showToast('プロンプトを入力してください', 'error');
+                    return;
+                }
+
+                if (!localStorage.getItem('gemini_api_key')) {
+                    if (typeof UI !== 'undefined') UI.showToast('APIキーを設定してください', 'error');
+                    return;
+                }
+
+                // UI状態切り替え
+                const dropzone = document.getElementById('dropzone');
+                const generating = document.getElementById('imageGenerating');
+                if (dropzone) dropzone.hidden = true;
+                if (generating) generating.hidden = false;
+
+                try {
+                    // 動的インポートで画像生成モジュールを読み込み
+                    const { generateImage } = await import('./imageGen.js');
+                    const blob = await generateImage(promptText);
+
+                    // プレビューに表示
+                    this.showImagePreview(blob);
+                    if (typeof UI !== 'undefined') UI.showToast('🎨 画像を生成しました！');
+
+                } catch (error) {
+                    console.error('画像生成エラー:', error);
+                    if (typeof UI !== 'undefined') UI.showToast(error.message || '画像生成に失敗しました', 'error');
+
+                    // ドロップゾーンを戻す
+                    if (dropzone) dropzone.hidden = false;
+                } finally {
+                    if (generating) generating.hidden = true;
+                }
+            });
+        }
     },
 
     /**
