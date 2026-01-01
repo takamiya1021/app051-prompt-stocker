@@ -158,18 +158,30 @@ const App = {
         }
 
         // ギャラリークリック
+        // ギャラリークリック（アクションボタン処理）
         if (this.elements.gallery) {
             this.elements.gallery.addEventListener('click', (e) => {
-                const favoriteBtn = e.target.closest('[data-action="favorite"]');
-                if (favoriteBtn) {
-                    e.stopPropagation();
-                    const card = favoriteBtn.closest('.prompt-card');
-                    this.toggleFavorite(card.dataset.id);
-                    return;
-                }
+                const btn = e.target.closest('.action-btn');
+                if (!btn) return; // ボタン以外は何もしない
 
-                const card = e.target.closest('.prompt-card');
-                if (card) this.openDetailModal(card.dataset.id);
+                e.stopPropagation();
+                const card = btn.closest('.prompt-card');
+                const id = card.dataset.id;
+                const action = btn.dataset.action;
+
+                if (action === 'copy') {
+                    const prompt = DB.getPrompts().find(p => p.id === id);
+                    if (prompt && typeof UI !== 'undefined') {
+                        UI.copyToClipboard(prompt.text);
+                        UI.showToast('📋 コピーしました');
+                    }
+                } else if (action === 'edit') {
+                    this.openEditModal(id);
+                } else if (action === 'delete') {
+                    this.deletePrompt(id);
+                } else if (action === 'favorite') {
+                    this.toggleFavorite(id);
+                }
             });
         }
 
@@ -236,6 +248,32 @@ const App = {
         }
         if (this.elements.importFile) {
             this.elements.importFile.addEventListener('change', (e) => this.importData(e));
+        }
+
+        // 高さ制限スライダー
+        const heightSlider = document.getElementById('heightSlider');
+        const unlimitedHeight = document.getElementById('unlimitedHeight');
+        const heightValue = document.getElementById('heightValue');
+
+        if (heightSlider && unlimitedHeight) {
+            const updateHeight = () => {
+                if (unlimitedHeight.checked) {
+                    heightSlider.disabled = true;
+                    document.documentElement.style.setProperty('--card-max-height', 'none');
+                    if (heightValue) heightValue.textContent = '全表示';
+                } else {
+                    heightSlider.disabled = false;
+                    const val = heightSlider.value;
+                    document.documentElement.style.setProperty('--card-max-height', val + 'px');
+                    if (heightValue) heightValue.textContent = val + 'px';
+                }
+            };
+
+            heightSlider.addEventListener('input', updateHeight);
+            unlimitedHeight.addEventListener('change', updateHeight);
+
+            // 初期状態反映
+            updateHeight();
         }
     },
 
@@ -355,7 +393,18 @@ const App = {
                 }
             }
         } else {
+            // 新規作成時の初期値設定
+            if (this.elements.modalTitle) this.elements.modalTitle.textContent = 'プロンプト登録';
             if (this.elements.promptId) this.elements.promptId.value = '';
+
+            // 現在のカテゴリフィルタを初期値に反映（all, favorite以外）
+            if (this.state.currentCategory &&
+                this.state.currentCategory !== 'all' &&
+                this.state.currentCategory !== 'favorite') {
+                if (this.elements.categorySelect) {
+                    this.elements.categorySelect.value = this.state.currentCategory;
+                }
+            }
         }
 
         // タグの補完リストを更新
@@ -480,7 +529,20 @@ const App = {
         if (prompt) {
             prompt.favorite = !prompt.favorite;
             DB.upsertPrompt(prompt);
-            this.renderGallery();
+
+            // DOMを直接更新（再描画による「ビビン」防止）
+            const card = this.elements.gallery.querySelector(`.prompt-card[data-id="${id}"]`);
+            if (card) {
+                const btn = card.querySelector('[data-action="favorite"]');
+                if (btn) {
+                    btn.textContent = prompt.favorite ? '⭐' : '☆';
+                    // 必要ならクラスもトグル
+                    // btn.classList.toggle('active', prompt.favorite);
+                }
+            }
+
+            // フィルタリング中などの場合のみ再描画が必要ならここに入れるが、
+            // 現状は全表示またはカテゴリフィルタのみなので、お気に入りの変化でカードが消えることはない想定。
         }
     },
 

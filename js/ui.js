@@ -7,7 +7,7 @@ const UI = {
     // カテゴリ表示名マッピング
     CATEGORY_LABELS: {
         image: '🖼️ 画像',
-        video: '🎬 動画生成',
+        video: '🎬 動画',
         chat: '💬 チャット',
         code: '💻 コーディング'
     },
@@ -53,14 +53,16 @@ const UI = {
             : '';
 
         card.innerHTML = `
-      ${imageHtml}
-      <div class="prompt-card__body">
-        <div class="prompt-card__category">${this.CATEGORY_LABELS[prompt.category] || prompt.category}</div>
+      <span class="prompt-card__category">${UI.CATEGORY_LABELS[prompt.category]}</span>
+      <div class="prompt-scroll-container">
+        ${imageHtml}
         <p class="prompt-card__text">${this.escapeHtml(prompt.text)}</p>
       </div>
-      <div class="prompt-card__footer">
-        <div class="prompt-card__tags">${tagsHtml}</div>
-        <button class="prompt-card__favorite ${prompt.favorite ? 'active' : ''}" data-action="favorite">
+      <div class="prompt-card__actions">
+        <button class="action-btn" data-action="copy" title="コピー">📋</button>
+        <button class="action-btn" data-action="edit" title="編集">✏️</button>
+        <button class="action-btn" data-action="delete" title="削除">🗑️</button>
+        <button class="action-btn favorite-btn ${prompt.favorite ? 'active' : ''}" data-action="favorite" title="お気に入り">
           ${prompt.favorite ? '⭐' : '☆'}
         </button>
       </div>
@@ -186,8 +188,9 @@ const UI = {
             }
         }
 
+        // カテゴリ表示除去
         if (categoryEl) {
-            categoryEl.textContent = this.CATEGORY_LABELS[prompt.category] || prompt.category;
+            categoryEl.style.display = 'none';
         }
 
         if (promptEl) {

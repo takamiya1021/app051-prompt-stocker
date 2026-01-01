@@ -37,7 +37,7 @@
                     <ul class="category-list" id="categoryList">
                         <li class="category-list__item active" data-category="all">📁 すべて</li>
                         <li class="category-list__item" data-category="image">🖼️ 画像</li>
-                        <li class="category-list__item" data-category="video">🎬 動画生成</li>
+                        <li class="category-list__item" data-category="video">🎬 動画</li>
                         <li class="category-list__item" data-category="chat">💬 チャット</li>
                         <li class="category-list__item" data-category="code">💻 コーディング</li>
                         <li class="category-list__item" data-category="favorite">⭐ お気に入り</li>
@@ -55,6 +55,18 @@
                     <button id="exportBtn" class="btn btn--secondary btn--small">📤 エクスポート</button>
                     <button id="importBtn" class="btn btn--secondary btn--small">📥 インポート</button>
                     <input type="file" id="importFile" accept=".json" hidden>
+                </div>
+
+                <div class="sidebar__group spacing-top">
+                    <h3 class="sidebar__title">表示設定</h3>
+                    <div class="setting-item">
+                        <label for="heightSlider" class="setting-label">高さ制限: <span id="heightValue">全表示</span></label>
+                        <input type="range" id="heightSlider" min="100" max="600" step="50" value="600" disabled>
+                    </div>
+                    <div class="setting-item checkbox-item">
+                        <input type="checkbox" id="unlimitedHeight" checked>
+                        <label for="unlimitedHeight">上限なし（全表示）</label>
+                    </div>
                 </div>
             </aside>
 
@@ -90,7 +102,7 @@
                     <label for="categorySelect">カテゴリ</label>
                     <select id="categorySelect" class="form-control" required>
                         <option value="image">🖼️ 画像</option>
-                        <option value="video">🎬 動画生成</option>
+                        <option value="video">🎬 動画</option>
                         <option value="chat">💬 チャット</option>
                         <option value="code">💻 コーディング</option>
                     </select>
