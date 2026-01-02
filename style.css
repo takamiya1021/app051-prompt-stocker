@@ -161,6 +161,11 @@ body {
     gap: 16px;
 }
 
+/* Hide Search Toggle on Desktop */
+.header__search-btn {
+    display: none;
+}
+
 /* Search Box */
 .search-box__input {
     width: 260px;
@@ -422,8 +427,9 @@ body {
 .gallery {
     flex: 1;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(336px, 1fr));
-    /* 280 * 1.2 = 336 */
+    /* Revert to 280px to prevent overflow on small screens/windows.
+        Cards will still grow (1fr) to fill space, maintaining "large" look check. */
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 20px;
     align-content: start;
     align-items: start;
