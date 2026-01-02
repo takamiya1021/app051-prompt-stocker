@@ -7,6 +7,7 @@
     "doc": "doc"
   },
   "scripts": {
+    "build": "bash scripts/update-version.sh",
     "test": "jest",
     "test:coverage": "jest --coverage",
     "record-demo": "node scripts/record_demo.js"
