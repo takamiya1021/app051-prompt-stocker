@@ -890,14 +890,100 @@ const App = {
      * Service Workerを登録
      */
     async registerServiceWorker() {
-        if ('serviceWorker' in navigator) {
-            try {
-                await navigator.serviceWorker.register('sw.js');
-                console.log('Service Worker registered');
-            } catch (error) {
-                console.warn('Service Worker registration failed:', error);
-            }
+        if (!('serviceWorker' in navigator)) {
+            console.warn('Service Worker not supported');
+            return;
         }
+
+        try {
+            const registration = await navigator.serviceWorker.register('sw.js');
+            console.log('Service Worker registered');
+
+            // 更新検知のセットアップ
+            this.setupServiceWorkerUpdate(registration);
+
+            // 定期的に更新をチェック（1時間ごと）
+            setInterval(() => {
+                registration.update();
+            }, 60 * 60 * 1000);
+
+        } catch (error) {
+            console.warn('Service Worker registration failed:', error);
+        }
+    },
+
+    /**
+     * Service Worker更新検知のセットアップ
+     */
+    setupServiceWorkerUpdate(registration) {
+        // 新しいService Workerがインストールされた時
+        registration.addEventListener('updatefound', () => {
+            const newWorker = registration.installing;
+            console.log('[App] New Service Worker found, installing...');
+
+            newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed') {
+                    if (navigator.serviceWorker.controller) {
+                        // 既存のSWがある = アップデート
+                        console.log('[App] New version available!');
+                        this.showUpdateBanner(newWorker);
+                    } else {
+                        // 初回インストール
+                        console.log('[App] Service Worker installed for the first time');
+                    }
+                }
+            });
+        });
+
+        // ページ読み込み時に既に待機中のSWがあるかチェック
+        if (registration.waiting) {
+            console.log('[App] Service Worker already waiting');
+            this.showUpdateBanner(registration.waiting);
+        }
+
+        // 他のタブで更新が適用された場合のリロード
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            console.log('[App] Controller changed, reloading...');
+            window.location.reload();
+        });
+    },
+
+    /**
+     * 更新通知バナーを表示
+     */
+    showUpdateBanner(waitingWorker) {
+        const banner = document.getElementById('updateBanner');
+        const updateBtn = document.getElementById('updateNowBtn');
+        const dismissBtn = document.getElementById('dismissUpdateBtn');
+
+        if (!banner) return;
+
+        // バナーを表示
+        banner.classList.add('show');
+
+        // 更新ボタンのクリックハンドラ
+        const handleUpdate = () => {
+            console.log('[App] Update requested by user');
+
+            // Service WorkerにskipWaitingを送信
+            waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+
+            // ボタンを無効化してフィードバック
+            updateBtn.textContent = '更新中...';
+            updateBtn.disabled = true;
+        };
+
+        // 閉じるボタンのクリックハンドラ
+        const handleDismiss = () => {
+            banner.classList.remove('show');
+        };
+
+        // イベントリスナー登録（重複防止のため一度削除）
+        updateBtn.replaceWith(updateBtn.cloneNode(true));
+        dismissBtn.replaceWith(dismissBtn.cloneNode(true));
+
+        document.getElementById('updateNowBtn').addEventListener('click', handleUpdate);
+        document.getElementById('dismissUpdateBtn').addEventListener('click', handleDismiss);
     }
 };
 
