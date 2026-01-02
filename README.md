@@ -58,7 +58,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-![Product Screenshot](doc/assets/demo.gif)
+![Product Screenshot](doc/assets/v102_demo_smooth.gif)
 
 生成AI由来の画像をアップロードして、プロンプト情報を視覚的に管理・検索できるWebアプリケーション。
 **「あの画像のプロンプト、なんだっけ？」** を一瞬で解決します。
