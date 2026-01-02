@@ -45,22 +45,36 @@ self.addEventListener('message', (event) => {
     }
 });
 
-// ネットワーク優先 (Network First) 戦略
+// キャッシュ優先 (Cache First) 戦略
+// キャッシュがあれば即座に返し、バックグラウンドで更新
 self.addEventListener('fetch', (event) => {
     event.respondWith(
-        fetch(event.request).then((response) => {
-            // 成功したレスポンスをキャッシュに保存
-            // ただしブラウザ拡張機能などの chrome-extension スキームは無視
-            if (event.request.url.startsWith('http')) {
-                const responseClone = response.clone();
-                caches.open(CACHE_NAME).then((cache) => {
-                    cache.put(event.request, responseClone);
-                });
+        caches.match(event.request).then((cachedResponse) => {
+            // キャッシュがあれば即座に返す
+            if (cachedResponse) {
+                // バックグラウンドでキャッシュを更新（Stale While Revalidate）
+                event.waitUntil(
+                    fetch(event.request).then((response) => {
+                        if (response && response.status === 200 && event.request.url.startsWith('http')) {
+                            caches.open(CACHE_NAME).then((cache) => {
+                                cache.put(event.request, response);
+                            });
+                        }
+                    }).catch(() => {})
+                );
+                return cachedResponse;
             }
-            return response;
-        }).catch(() => {
-            // オフライン時はキャッシュから返す
-            return caches.match(event.request);
+
+            // キャッシュがなければネットワークから取得してキャッシュに保存
+            return fetch(event.request).then((response) => {
+                if (response && response.status === 200 && event.request.url.startsWith('http')) {
+                    const responseClone = response.clone();
+                    caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(event.request, responseClone);
+                    });
+                }
+                return response;
+            });
         })
     );
 });
