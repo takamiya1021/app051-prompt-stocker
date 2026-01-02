@@ -15,9 +15,8 @@ fi
 
 echo "Updating version to: $VERSION"
 
-# index.htmlのバージョン表記を更新
-sed -i "s/v[0-9]\+\.[0-9]\+\.[0-9]\+\(-[a-zA-Z0-9.-]*\)\?/${VERSION}/g" index.html
-sed -i "s/build-[a-f0-9]\{7\}/${VERSION}/g" index.html
-sed -i "s/dev/${VERSION}/g" index.html
+# index.htmlのバージョン表記を更新（プレースホルダー方式）
+# __VERSION__ を実際のバージョンに置換
+sed -i "s/__VERSION__/${VERSION}/g" index.html
 
 echo "Version updated successfully!"
