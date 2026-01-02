@@ -547,6 +547,8 @@ body {
 
 .prompt-card__meta {
     flex: 1;
+    min-width: 0;
+    /* Prevent flex item from overflowing */
     /* padding-left: 12px; handled in inline or here */
 }
 
