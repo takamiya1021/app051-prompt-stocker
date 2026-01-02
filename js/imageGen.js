@@ -34,11 +34,22 @@ export async function generateImage(prompt) {
         const GenAI = await initSDK();
         const genAI = new GenAI(apiKey);
 
-        // gemini-3-pro-image-preview モデルを使用
-        // GEMINI.md によると responseModalities の指定は不要（デフォルトで画像生成優先）
-        const model = genAI.getGenerativeModel({
-            model: 'gemini-3-pro-image-preview'
-        });
+        // LocalStorage から選択されたモデルを取得（デフォルトは Flash）
+        const selectedModel = localStorage.getItem('gemini_ai_model') || 'gemini-2.5-flash-image';
+
+        // モデルに応じた設定を準備（GEMINI.md の指針に準拠）
+        const modelOptions = {
+            model: selectedModel
+        };
+
+        // Nano Banana (Flash) の場合は画像生成を強制するために responseModalities を指定
+        if (selectedModel === 'gemini-2.5-flash-image') {
+            modelOptions.generationConfig = {
+                responseModalities: ['IMAGE']
+            };
+        }
+
+        const model = genAI.getGenerativeModel(modelOptions);
 
         const result = await model.generateContent(prompt);
         const response = result.response;

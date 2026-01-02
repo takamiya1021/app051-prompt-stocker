@@ -1,107 +1,27 @@
-# プロンプトストッカー 実装計画書（TDD準拠版）
+# ルール刷新計画：日本語ドキュメント作成の徹底
 
-## ゴール
-生成画像からプロンプトを探せる「ビジュアル検索型」プロンプト管理ツールの構築
+Antigravityが生成する成果物を確実に日本語化するため、`GEMINI.md`（MEMORY[user_global]）の言語設定ルールを刷新します。
+
+## ユーザー確認事項
 
 > [!IMPORTANT]
-> **TDD（Red-Green-Refactor）** でユニットテストを先に書いてから実装する
+> 英語のテンプレートに引きずられる問題を解決するため、「英語で構成を固めた後に日本語へ翻訳・再構築する」という明示的なツーステップのプロセスを思考ルーチンとして定義します。
 
----
+## 修正内容
 
-## 技術スタック
+### [MEMORY] GEMINI.md
 
-| 項目 | ツール |
-|------|--------|
-| テストフレームワーク | Jest + jsdom |
-| E2Eテスト | Playwright（最終動作確認） |
-| フロントエンド | HTML/CSS/JavaScript（Vanilla） |
-| データ保存 | IndexedDB + LocalStorage |
-
----
-
-## ファイル構成
-
-```
-app051-prompt-stocker/
-├── index.html
-├── style.css
-├── manifest.json
-├── sw.js
-├── js/
-│   ├── db.js
-│   ├── ui.js
-│   └── app.js
-├── __tests__/
-│   ├── db.test.js
-│   ├── ui.test.js
-│   └── app.test.js
-├── package.json
-└── jest.config.js
-```
-
----
-
-## 実装フェーズ
-
-### Phase 0: テスト環境構築 [x]
-- [x] npm init
-- [x] Jest + jsdom インストール
-- [x] jest.config.js 作成
-- [x] テスト実行確認
-
-### Phase 1: データベースモジュール（TDD） [x]
-- [x] 🔴 Red: generateId テスト
-- [x]  Green: generateId 実装
-- [x] 🔵 Refactor
-- [x] 🔴 Red: LocalStorage CRUD テスト
-- [x] 🟢 Green: LocalStorage CRUD 実装
-- [x] 🔵 Refactor
-- [x] 🔴 Red: IndexedDB 画像保存テスト
-- [x] 🟢 Green: IndexedDB 画像保存実装
-- [x] 🔵 Refactor
-
-### Phase 2: UIモジュール（TDD） [x]
-- [x] 🔴 Red: カード生成テスト
-- [x]  Green: カード生成実装
-- [x] 🔵 Refactor
-- [x] 🔴 Red: モーダル制御テスト
-- [x]  Green: モーダル制御実装
-- [x] 🔵 Refactor
-
-### Phase 3: アプリケーションロジック（TDD） [x]
-- [x] 🔴 Red: フィルタリングテスト
-- [x]  Green: フィルタリング実装
-- [x] 🔵 Refactor
-- [x] 🔴 Red: 検索テスト
-- [x] 🟢 Green: 検索実装
-- [x] 🔵 Refactor
-
-### Phase 4: E2E動作確認 [x]
-- [x] Playwright でユーザー操作テスト
-
-### Phase 5: UI改善・不具合修正 [x]
-- [x] ラベル修正（「画像生成」→「画像」） [index.html, js/ui.js]
-- [x] 画像アップロードUIの改善（プレビュー表示位置） [index.html, style.css, js/app.js]
-- [x] タグ入力時の自動補完（datalist） [index.html, js/app.js]
-- [x] PWAの完全実装
-    - [x] icons/ ディレクトリ作成
-    - [x] アイコン画像生成（Android用/iOS用）
-    - [x] manifest.json 作成
-    - [x] sw.js 作成（キャッシング戦略実装）
-    - [x] index.html のPWAメタタグ修正
-    - [x] js/app.js のSW登録パス修正（相対パス化）
-
----
+#### [MODIFY] [GEMINI.md](file:///home/ustar-wsl-2-2/.gemini/GEMINI.md)
+- 「Antigravity Agent用 言語設定」セクションを以下のように書き換えます。
+    - **思考プロセスの明示**: 内部で英語テンプレートを使用してもよいが、最終出力は必ず日本語へ再構築することを義務付け。
+    - **「英語→日本語」プロセスの確立**: お嬢の提案をそのままルールとして組み込みます。
+    - **警告**: システム初期値（英語）の垂れ流しを「信頼関係の毀損」と定義し、自制を促します。
 
 ## 検証計画
 
-### ユニットテスト（Jest）
-```bash
-npm test
-```
-- 全テストパス
-- カバレッジ80%以上
+### 自動テスト（Playwright）
+- ※このタスクはルール設定のみのため、Playwrightによる自動テストは実施しません。
 
-### E2E（Playwright）
-- プロンプト登録→検索→コピーの一連操作
-- オフライン動作確認
+### 手動確認
+- お嬢に `GEMINI.md` の記述が意図通りになっているか確認してもらう。
+- 次回以降の成果物作成時に、このルールが遵守されているか厳しくチェックしてもらう。

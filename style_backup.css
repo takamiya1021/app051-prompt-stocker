@@ -127,6 +127,7 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    width: 100%;
     /* Ambient Gradient Background */
     background: linear-gradient(180deg, rgba(0, 0, 0, 0.02) 0%, var(--bg-base) 40%);
 }
@@ -208,11 +209,10 @@ body {
     position: sticky;
     top: var(--header-height);
     width: var(--sidebar-width);
-    /* Guarantee height spans the rest of the viewport */
-    height: calc(100vh - var(--header-height));
+    min-height: calc(100vh - var(--header-height));
     background-color: var(--bg-press);
     /* Sidebar is darker/lighter */
-    padding: 12px 10px;
+    padding: 16px 12px;
     overflow-y: auto;
     flex-shrink: 0;
     /* Ensure border reaches bottom */
@@ -299,11 +299,6 @@ body {
 .category-list__item.active {
     color: var(--brand-accent);
     background-color: var(--bg-elevated);
-}
-
-/* Hide Mobile Header (Logo + Close) on Desktop */
-.sidebar__mobile-header {
-    display: none;
 }
 
 /* Tag Cloud (Chips) */
@@ -443,52 +438,17 @@ body {
 
 /* Prompt Card (Text Wrap Design) */
 .prompt-card {
-    background-color: var(--bg-surface);
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    overflow: hidden;
-    transition: transform 0.2s, box-shadow 0.2s;
-    display: flex;
-    flex-direction: column;
-    /* height: 100%; - Removed to allow card to shrink to content height (Slider fix) */
-    border: 1px solid var(--border-subdued);
+    background-color: var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    display: block;
+    /* For float layout */
     position: relative;
-    /* For Absolute Badge */
+    border: 1px solid transparent;
     min-height: 120px;
     /* Ensure height for image + padding */
-}
-
-/* Category Badge (Top Right) */
-.prompt-card__category-badge {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    background-color: var(--bg-elevated);
-    border: 1px solid var(--border-subdued);
-    border-radius: 12px;
-    padding: 4px 10px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    z-index: 10;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.prompt-card__tag--more {
-    background-color: transparent;
-    border: 1px dashed var(--border-subdued);
-    color: var(--text-tertiary);
-}
-
-.prompt-card__tag[data-action="filter-tag"] {
-    cursor: pointer;
-    transition: background-color 0.2s, color 0.2s;
-}
-
-.prompt-card__tag[data-action="filter-tag"]:hover {
-    background-color: var(--primary-color-alpha);
-    color: var(--primary-color);
-    border-color: var(--primary-color-alpha);
 }
 
 /* Clearfix */
@@ -586,44 +546,18 @@ body {
 }
 
 /* Actions Container */
-/* Actions Container */
 .prompt-card__actions {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
     display: flex;
     align-items: center;
-    justify-content: flex-end;
-    /* Align right */
-    padding: 8px 16px 2px 16px;
-    /* Reduced bottom padding */
+    justify-content: space-between;
+    padding: 10px 16px;
     border-top: 1px solid var(--border-main);
     flex-shrink: 0;
+    flex-grow: 0;
     gap: 8px;
-    margin-top: auto;
-    /* Push to bottom if parent is flex col */
-    background-color: var(--bg-surface);
-    /* Ensure background */
-    order: 1;
-    /* Position ABOVE tags (Mobile-style) */
-    width: 100%;
-}
-
-/* Footer Container (Base) */
-.prompt-card__footer {
-    display: flex;
-    flex-direction: column;
-    /* Stack by default, or row? Let's use Column for Buttons Top / Tags Bottom consistency OR Row for Desktop */
-    /* User liked Mobile Buttons Top, Tags Bottom. Let's stick to that for Consistency? 
-       Or standard Desktop: Row. 
-       Let's try standard Desktop Row: Tags Left, Actions Right. 
-       BUT current HTML structure: Footer -> [Left(Tags), Actions]. 
-       If I use Row: Left(Tags) ------- Actions. 
-       If User said "Tags position weird", maybe they want them in flow.
-       Let's use Flex Column for now to match Mobile logic (Buttons, Tags) or just simple flow.
-       Wait, Mobile: Footer { flex-col }. 
-       Base: Let's make it Flex Column too. Cleanest.
-    */
-    flex-direction: column;
-    gap: 0;
-    /* Tighten gap between Actions and Tags */
 }
 
 .prompt-card__footer-left {
@@ -633,11 +567,6 @@ body {
     flex-wrap: wrap;
     flex: 1;
     min-width: 0;
-    order: 2;
-    /* Ensure positioned BELOW Actions */
-    width: 100%;
-    padding-left: 12px;
-    /* Alignment */
 }
 
 .prompt-card__category {
@@ -1023,601 +952,209 @@ body {
 }
 
 textarea.form-control {
-    min-height: 120px;
     resize: vertical;
-    line-height: 1.5;
+    min-height: 100px;
 }
 
-/* Form Layout */
 .form-group {
     margin-bottom: 24px;
 }
 
-.app-container {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    background-color: var(--bg-primary);
-    color: var(--text-primary);
-}
 
 .form-group label {
     display: block;
-    font-size: 12px;
-    font-weight: 700;
     margin-bottom: 8px;
-    color: var(--text-primary);
+    color: var(--text-secondary);
+    font-weight: 700;
+    font-size: 14px;
 }
 
-.checkbox-label {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    user-select: none;
-}
-
-.checkbox-label input {
-    width: 20px;
-    height: 20px;
-    accent-color: var(--brand-accent);
-}
-
-.modal__footer {
+.form-actions {
     display: flex;
     justify-content: flex-end;
-    gap: 16px;
+    gap: 12px;
     margin-top: 32px;
-    padding-top: 24px;
-    border-top: 1px solid var(--border-subdued);
 }
 
-/* Image Upload */
-.image-upload {
-    margin-top: 8px;
+/* Toast */
+.toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background-color: var(--brand-accent);
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 500px;
+    font-weight: 700;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 2000;
 }
 
-.image-upload [hidden] {
-    display: none !important;
+.toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
 }
 
-.image-upload__dropzone {
+.toast.error {
+    background-color: var(--text-negative);
+}
+
+/* Image Preview */
+.image-preview {
+    margin-top: 12px;
+    max-width: 100%;
+    border-radius: 4px;
+    display: none;
+}
+
+.image-preview[src] {
+    display: block;
+}
+
+/* Drag & Drop Zone */
+.drop-zone {
     border: 2px dashed var(--border-subdued);
-    border-radius: var(--radius-md);
-    padding: 32px;
+    border-radius: 8px;
+    padding: 20px;
     text-align: center;
-    transition: all var(--transition-highlight);
-    background: var(--bg-base);
     color: var(--text-subdued);
+    transition: border-color var(--transition-normal);
     cursor: pointer;
 }
 
-.image-upload__dropzone:hover,
-.image-upload__dropzone.dragover {
+.drop-zone.dragover {
     border-color: var(--brand-accent);
-    background: var(--bg-elevated);
+    background-color: var(--bg-elevated);
     color: var(--text-primary);
 }
 
-.image-upload__preview {
-    position: relative;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    background: var(--bg-press);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    padding: 16px;
-}
-
-.image-upload__preview img {
-    max-width: 100%;
-    max-height: 300px;
-    object-fit: contain;
-    border-radius: 4px;
-}
-
-/* Detail View */
-.detail-view {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 32px;
-}
-
+/* View Mode Details */
 .detail-view__image {
-    background: var(--bg-press);
-    border-radius: var(--radius-md);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 300px;
-    overflow: hidden;
+    width: 100%;
+    margin-bottom: 20px;
+    border-radius: 4px;
 }
 
 .detail-view__image img {
     width: 100%;
     height: auto;
-    object-fit: contain;
+    border-radius: 4px;
 }
 
 .detail-view__image--placeholder {
-    font-size: 64px;
-    color: var(--text-subdued);
+    width: 100%;
+    height: 200px;
+    background: var(--bg-elevated);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: var(--text-secondary);
+    border-radius: 4px;
 }
 
-.detail-view__info {
+/* Utility */
+.hidden {
+    display: none !important;
+}
+
+/* Detail View Layout (Spotify Style) */
+.detail-layout {
+    display: flex;
+    gap: 32px;
+    /* Spacing between image and details */
+    align-items: flex-start;
+}
+
+/* Image Section */
+.detail-layout__image {
+    flex: 0 0 40%;
+    /* Fixed 40% width for image */
+    max-width: 400px;
+    /* Limit max width */
+}
+
+/* Details Section (Right Side) */
+.detail-layout__content {
+    flex: 1;
+    /* Take remaining space */
     display: flex;
     flex-direction: column;
     gap: 24px;
+    /* Spacing between text blocks */
 }
 
-.detail-view__category {
-    font-size: 12px;
+/* Category Label */
+.detail-category {
+    font-size: 0.85rem;
     font-weight: 700;
     text-transform: uppercase;
+    letter-spacing: 0.05em;
     color: var(--brand-accent);
+    margin-bottom: 8px;
 }
 
-.detail-view__prompt {
-    font-size: 16px;
+/* Prompt Text Large */
+.detail-prompt {
+    font-size: 1.1rem;
     line-height: 1.6;
     color: var(--text-primary);
     white-space: pre-wrap;
+    /* Preserve formatting */
 }
 
-.detail-view__tags {
+/* Metadata Block */
+.detail-meta {
+    padding-top: 24px;
+    border-top: 1px solid var(--border-subdued);
+}
+
+.detail-meta h3 {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+}
+
+/* Tag Cloud in Detail */
+.detail-tags {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
 }
 
-.detail-view__actions {
-    margin-top: auto;
-    display: flex;
-    gap: 12px;
-    padding-top: 24px;
-    border-top: 1px solid var(--border-subdued);
-}
-
-@media (max-width: 700px) {
-    .detail-view {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* Toasts */
-.toast {
-    background: #2E77D0;
-    /* Spotify Blue for info/success sometimes, or Green */
-    color: #fff;
-    border-radius: 4px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    border: none;
-    font-weight: 500;
-}
-
-.toast.success {
-    background: var(--brand-accent);
-    color: #000;
-}
-
-.toast.error {
-    background: var(--text-negative);
-    color: #fff;
-}
-
-/* Responsive adjustments */
-/* Responsive adjustments (Intermediate) */
-@media (max-width: 900px) {
-    .gallery {
-        padding: 16px;
-    }
-
-    .gallery {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: 12px;
-    }
-}
-
-/* ========================================
-   Enhanced UX Styles (Aesthetic-Usability & Delight)
-   ======================================== */
-
-/* 1. Micro-interactions: Buttons */
-.btn {
-    position: relative;
-    overflow: hidden;
-}
-
-.btn:active {
-    transform: scale(0.98);
-}
-
-.btn--primary {
-    box-shadow: 0 4px 14px rgba(29, 185, 84, 0.3);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.btn--primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
-}
-
-.btn--primary:active {
-    transform: translateY(0);
-}
-
-/* 2. Category List Items */
-.category-list__item {
-    position: relative;
-    overflow: hidden;
-}
-
-.category-list__item:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-    transform: translateX(4px);
-}
-
-.category-list__item.active {
-    background: linear-gradient(90deg, rgba(29, 185, 84, 0.1) 0%, rgba(29, 185, 84, 0) 100%);
-    border-left: 3px solid var(--brand-accent);
-    padding-left: 11px;
-}
-
-/* 3. Search Box Focus */
-.search-box__input:focus {
-    width: 320px;
-}
-
-/* 4. Favorite Animation */
-@keyframes heartBeat {
-    0% {
-        transform: scale(1);
-    }
-
-    14% {
-        transform: scale(1.3);
-    }
-
-    28% {
-        transform: scale(1);
-    }
-
-    42% {
-        transform: scale(1.3);
-    }
-
-    70% {
-        transform: scale(1);
-    }
-}
-
-.prompt-card__favorite.active {
-    color: #ffd700;
-    opacity: 1;
-    animation: heartBeat 1s;
-}
-
-/* 5. Rich Toast Notification */
-.toast {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: rgba(255, 255, 255, 0.95);
-    border-left: none;
-    border-bottom: 3px solid transparent;
-}
-
-.toast.success {
-    border-bottom-color: var(--color-success);
-}
-
-.toast.error {
-    border-bottom-color: var(--color-danger);
-}
-
-
-/* ========================================
-   Responsive Adjustments (Mobile & Tablet)
-   ======================================== */
-
-/* Hamburger Menu Button (Default Hidden) */
-.header__menu-btn {
-    display: none;
-    background: none;
-    border: none;
-    color: var(--text-primary);
-    font-size: 24px;
-    cursor: pointer;
-    padding: 8px;
-    margin-right: 12px;
-}
-
-/* Sidebar Overlay (Backdrop) */
-.sidebar-overlay {
-    position: fixed;
-    inset: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(2px);
-    z-index: 900;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-}
-
-.sidebar-overlay.active {
-    opacity: 1;
-    visibility: visible;
-}
-
-/* Mobile Styles */
+/* Responsive for Detail Modal */
 @media (max-width: 768px) {
-
-    /* 1. Show Hamburger */
-    .header__menu-btn {
-        display: block;
+    .detail-layout {
+        flex-direction: column;
+        /* Stack vertically on mobile */
     }
 
-    .header {
-        padding: 8px 16px;
-        position: sticky;
-        top: 0;
-        z-index: 100;
-    }
-
-    /* 2. Optimized Title (Restored Text) */
-    .header__title-text {
-        display: block;
-        font-size: 1.1rem;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 200px;
-    }
-
-    .header__title-icon {
-        display: none;
-    }
-
-    /* 3. Mobile Search Toggle */
-    .header__search-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: none;
-        border: none;
-        font-size: 1.2rem;
-        cursor: pointer;
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        color: var(--text-primary);
-        margin-right: 4px;
-    }
-
-    .header__search-btn:hover {
-        background-color: var(--bg-elevated);
-    }
-
-    /* Search Box: Popup Style on Mobile */
-    .search-box {
-        display: none;
-        position: absolute;
-        top: 100%;
-        left: 0;
+    .detail-layout__image {
+        flex: 0 0 auto;
         width: 100%;
-        padding: 12px 16px;
-        background-color: var(--bg-surface);
-        border-bottom: 1px solid var(--border-main);
-        backdrop-filter: blur(10px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        z-index: 90;
+        max-width: 100%;
+        margin: 0 auto;
     }
+}
 
-    .search-box.active {
-        display: block;
-        animation: slideDown 0.2s ease-out;
+
+/* ========================================
+   Responsive Adjustments (Global)
+   ======================================== */
+@media (max-width: 1024px) {
+    .app {
+        /* Tablet adjustments if needed */
     }
+}
 
-    .search-box__input {
-        width: 100%;
-    }
-
-    @keyframes slideDown {
-        from {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    /* 2. Sidebar as Drawer */
+@media (max-width: 768px) {
     .sidebar {
-        position: fixed;
-        top: 0;
-        left: -280px;
-        width: 280px;
-        height: 100vh;
-        z-index: 1000;
-        transition: transform 0.35s cubic-bezier(0.2, 0, 0, 1);
-        box-shadow: none;
-        /* No shadow */
-        min-height: 100vh;
-        padding-top: 0;
-    }
-
-    .sidebar.active {
-        transform: translateX(280px);
-        /* Slide in */
-    }
-
-    /* Mobile Sidebar Header */
-    .sidebar__mobile-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 16px;
-        margin-bottom: 8px;
-        border-bottom: 1px solid var(--border-subdued);
-        background: var(--bg-surface);
-    }
-
-    .sidebar__logo {
-        font-weight: 700;
-        font-size: 1.1rem;
-        /* Match header title size */
-        letter-spacing: -0.01em;
-        color: var(--text-primary);
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .sidebar__close-btn {
-        display: block;
-        /* Show on mobile */
-        background: none;
-        border: none;
-        color: var(--text-secondary);
-        font-size: 28px;
-        /* Larger hit area */
-        line-height: 1;
-        cursor: pointer;
-        padding: 8px;
-        /* Larger touch target */
-        margin-right: -8px;
-        /* Alignment adjustment */
-        transition: color 0.2s;
-    }
-
-    .sidebar__close-btn:hover {
-        color: var(--text-primary);
-    }
-
-    /* Mobile Menu Items optimization */
-    .category-list__item {
-        padding: 12px 16px;
-        /* Larger touch padding */
-        margin-bottom: 4px;
-        border-radius: 8px;
-    }
-
-    .category-list__btn {
-        font-size: 1rem;
-        /* Readable font size */
-    }
-
-    /* 3. Stylish Header "Add New" Button */
-    #addBtn .btn-text {
-        display: none;
-    }
-
-    #addBtn {
-        padding: 0;
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        /* Premium Gradient & Glow */
-        background: linear-gradient(135deg, #1DB954 0%, #1ED760 100%);
-        box-shadow: 0 4px 14px rgba(29, 185, 84, 0.4);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    #addBtn .btn-icon {
-        font-size: 1.6rem;
-        font-weight: 300;
-        line-height: 1;
-        margin-right: 0;
-        margin-top: -3px;
-        /* Precise visual centering */
-        color: white;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    }
-
-    .btn {
-        gap: 0;
-    }
-
-    /* 4. Card Layout (Badge + Compact Footer) */
-    .prompt-card__footer {
-        flex-direction: column;
-        align-items: stretch;
-        padding-bottom: 8px;
-        margin-top: 12px;
-        /* Space from Body Text */
-        border-top: none;
-        /* Line removed as requested */
-        padding-top: 8px;
-    }
-
-    /* Footer Left now only contains Tags */
-    .prompt-card__footer-left {
-        width: 100%;
-        margin-bottom: 0;
-        /* No margin needed at bottom */
-        order: 2;
-        /* Move to bottom */
-        padding-left: 12px;
-        /* Increased indentation as requested */
-    }
-
-    .prompt-card__actions {
-        display: flex;
-        flex-direction: row;
-        justify-content: flex-end;
-        width: 100%;
-        gap: 20px;
-
-        /* Reordering to Top */
-        order: 1;
-
-        /* Border Adjustments for "Top Position" */
-        padding-top: 0;
-        padding-bottom: 8px;
-        border-top: none;
-        border-bottom: none;
-        /* Removed as requested */
-        margin-bottom: 8px;
-    }
-
-    .prompt-card__tags {
-        flex-wrap: wrap;
-        gap: 8px;
-        width: 100%;
-    }
-
-    .prompt-card__tag {
-        font-size: 0.75rem;
-    }
-
-    /* Adjust Grid for Mobile (Edge-to-Edge) */
-    .gallery {
-        grid-template-columns: 1fr;
-        gap: 8px;
-        /* Slight separation between cards */
-        padding: 8px 0 80px 0;
-        /* No side padding = Full Width */
-    }
-
-    /* Square-ish cards on mobile for feed look */
-    .prompt-card {
-        border-radius: 0;
-        margin-bottom: 1px;
-        box-shadow: none;
-        border-top: 1px solid var(--border-subdued);
-        border-bottom: 1px solid var(--border-subdued);
-    }
-
-    .main {
-        flex-direction: column;
+        /* Standard implementation hides sidebar or turns it into drawer */
+        /* For now, just reducing width or keeping it as is?
+           User request: "Show left pane even on mobile" -> Drawer menu needed.
+        */
     }
 }

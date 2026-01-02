@@ -48,11 +48,16 @@ const UI = {
             ? `<img class="prompt-card__image" src="${imageUrl}" alt="生成画像" loading="lazy">`
             : `<div class="prompt-card__image prompt-card__image--placeholder">${this.getCategoryEmoji(prompt.category)}</div>`;
 
-        const tagsHtml = prompt.tags && prompt.tags.length
-            ? prompt.tags.slice(0, 3).map(tag => `<span class="prompt-card__tag">#${tag}</span>`).join('')
-            : '';
+        const visibleTags = prompt.tags && prompt.tags.length > 0 ? prompt.tags.slice(0, 3) : [];
+        const remainingCount = prompt.tags ? Math.max(0, prompt.tags.length - 3) : 0;
+
+        const tagsHtml = visibleTags.map(tag =>
+            `<span class="prompt-card__tag" data-action="filter-tag" data-tag="${tag}">#${tag}</span>`
+        ).join('') +
+            (remainingCount > 0 ? `<span class="prompt-card__tag prompt-card__tag--more">+${remainingCount}</span>` : '');
 
         card.innerHTML = `
+      <div class="prompt-card__category-badge">${this.CATEGORY_LABELS[prompt.category] || prompt.category}</div>
       <div class="prompt-card__header">
           <div class="prompt-card__image-container" style="flex: 0 0 50%; max-width: 50%;">
               ${imageHtml}
@@ -66,7 +71,6 @@ const UI = {
       </div>
       <div class="prompt-card__footer">
         <div class="prompt-card__footer-left">
-          <span class="prompt-card__category">${this.CATEGORY_LABELS[prompt.category] || prompt.category}</span>
           <div class="prompt-card__tags">${tagsHtml}</div>
         </div>
         <div class="prompt-card__actions">

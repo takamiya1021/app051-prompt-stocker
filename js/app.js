@@ -21,6 +21,24 @@ const App = {
     currentImageBlob: null,
 
     /**
+     * モバイルメニューの開閉
+     * @param {boolean} show 
+     */
+    toggleMobileMenu(show) {
+        if (!this.elements.sidebar || !this.elements.sidebarOverlay) return;
+
+        if (show) {
+            this.elements.sidebar.classList.add('active');
+            this.elements.sidebarOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        } else {
+            this.elements.sidebar.classList.remove('active');
+            this.elements.sidebarOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    },
+
+    /**
      * プロンプトをフィルタリング
      * @param {Array} prompts
      * @returns {Array}
@@ -104,7 +122,14 @@ const App = {
             tagSuggestions: document.getElementById('tagSuggestions'),
             exportBtn: document.getElementById('exportBtn'),
             importBtn: document.getElementById('importBtn'),
-            importFile: document.getElementById('importFile')
+            importFile: document.getElementById('importFile'),
+            // Mobile Menu Elements
+            menuBtn: document.getElementById('menuBtn'),
+            closeMenuBtn: document.getElementById('closeMenuBtn'),
+            mobileSearchBtn: document.getElementById('mobileSearchBtn'), // New
+            searchBox: document.querySelector('.search-box'), // Make sure this targets the wrapper
+            sidebar: document.getElementById('sidebar'),
+            sidebarOverlay: document.getElementById('sidebarOverlay')
         };
     },
 
@@ -117,12 +142,12 @@ const App = {
             this.elements.addBtn.addEventListener('click', () => this.openEditModal());
         }
 
-        // モーダル閉じるボタン
-        const closeModal = document.getElementById('closeModal');
-        if (closeModal) closeModal.addEventListener('click', () => UI.closeModal('editModal'));
-
-        const closeDetailModal = document.getElementById('closeDetailModal');
-        if (closeDetailModal) closeDetailModal.addEventListener('click', () => UI.closeModal('detailModal'));
+        // モーダル閉じるボタン（汎用）
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('[data-close-modal]')) {
+                UI.closeAllModals();
+            }
+        });
 
         const cancelBtn = document.getElementById('cancelBtn');
         if (cancelBtn) cancelBtn.addEventListener('click', () => UI.closeModal('editModal'));
@@ -172,6 +197,12 @@ const App = {
                 const action = actionBtn.dataset.action;
 
                 switch (action) {
+                    case 'filter-tag':
+                        const tag = actionBtn.dataset.tag;
+                        if (tag && typeof App !== 'undefined') {
+                            App.handleTagSelect(tag);
+                        }
+                        break;
                     case 'copy':
                         const prompts = typeof DB !== 'undefined' ? DB.getPrompts() : [];
                         const prompt = prompts.find(p => p.id === promptId);
@@ -216,6 +247,46 @@ const App = {
                 this.elements.dropzone.classList.remove('dragover');
             });
             this.elements.dropzone.addEventListener('drop', (e) => this.handleImageDrop(e));
+        }
+
+        // Mobile Menu Toggle
+        if (this.elements.menuBtn) {
+            this.elements.menuBtn.addEventListener('click', () => {
+                this.toggleMobileMenu(true);
+            });
+        }
+
+        if (this.elements.closeMenuBtn) {
+            this.elements.closeMenuBtn.addEventListener('click', () => {
+                this.toggleMobileMenu(false);
+            });
+        }
+
+        // Mobile Search Toggle
+        if (this.elements.mobileSearchBtn && this.elements.searchBox) {
+            this.elements.mobileSearchBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.elements.searchBox.classList.toggle('active');
+                if (this.elements.searchInput) {
+                    setTimeout(() => this.elements.searchInput.focus(), 100);
+                }
+            });
+
+            // Context Click check for search close
+            document.addEventListener('click', (e) => {
+                if (window.innerWidth <= 768 &&
+                    this.elements.searchBox.classList.contains('active') &&
+                    !this.elements.searchBox.contains(e.target) &&
+                    !this.elements.mobileSearchBtn.contains(e.target)) {
+                    this.elements.searchBox.classList.remove('active');
+                }
+            });
+        }
+
+        if (this.elements.sidebarOverlay) {
+            this.elements.sidebarOverlay.addEventListener('click', () => {
+                this.toggleMobileMenu(false);
+            });
         }
 
         // 詳細モーダルのアクション
@@ -264,6 +335,7 @@ const App = {
         const heightValue = document.getElementById('heightValue');
 
         if (heightSlider && unlimitedHeight) {
+            let rafId = null;
             const updateHeight = () => {
                 if (unlimitedHeight.checked) {
                     heightSlider.disabled = true;
@@ -275,8 +347,13 @@ const App = {
                     document.documentElement.style.setProperty('--card-max-height', val + 'px');
                     if (heightValue) heightValue.textContent = val + 'px';
                 }
-                // 高さ変更後にトランケーション状態を再チェック
-                this.checkTextTruncation();
+
+                // パフォーマンス最適化: requestAnimationFrame で描画に合わせて実行
+                if (rafId) cancelAnimationFrame(rafId);
+                rafId = requestAnimationFrame(() => {
+                    this.checkTextTruncation();
+                    rafId = null;
+                });
             };
 
             heightSlider.addEventListener('input', updateHeight);
@@ -322,23 +399,41 @@ const App = {
         const clearApiKeyBtn = document.getElementById('clearApiKeyBtn');
 
         if (saveApiKeyBtn && apiKeyInput) {
-            // 保存済みキーがあればプレースホルダーを変更
-            if (localStorage.getItem('gemini_api_key')) {
+            const aiModelSelect = document.getElementById('aiModelSelect');
+
+            // 保存済み設定があれば反映
+            const savedKey = localStorage.getItem('gemini_api_key');
+            if (savedKey) {
                 apiKeyInput.placeholder = '●●●●●●●●（設定済み）';
+            }
+            if (aiModelSelect) {
+                const savedModel = localStorage.getItem('gemini_ai_model');
+                if (savedModel) {
+                    aiModelSelect.value = savedModel;
+                }
             }
 
             saveApiKeyBtn.addEventListener('click', () => {
                 const key = apiKeyInput.value.trim();
+                const model = aiModelSelect ? aiModelSelect.value : null;
+
                 if (key) {
                     localStorage.setItem('gemini_api_key', key);
                     apiKeyInput.value = '';
                     apiKeyInput.placeholder = '●●●●●●●●（設定済み）';
+                }
+
+                if (model) {
+                    localStorage.setItem('gemini_ai_model', model);
+                }
+
+                if (key || model) {
                     if (apiKeyStatus) {
                         apiKeyStatus.textContent = '✓ 保存しました';
                         apiKeyStatus.className = 'api-key-status saved';
                         setTimeout(() => { apiKeyStatus.textContent = ''; }, 3000);
                     }
-                    if (typeof UI !== 'undefined') UI.showToast('🔑 APIキーを保存しました');
+                    if (typeof UI !== 'undefined') UI.showToast('⚙️ 設定を保存しました');
                 }
             });
         }

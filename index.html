@@ -19,19 +19,32 @@
     <div class="app">
         <!-- ヘッダー -->
         <header class="header">
-            <h1 class="header__title">🗃️ Prompt Stocker</h1>
+            <button id="menuBtn" class="header__menu-btn" aria-label="メニューを開く">☰</button>
+            <h1 class="header__title">
+                <span class="header__title-text">🗃️ Prompt Stocker</span>
+                <span class="header__title-icon">🗃️</span>
+            </h1>
             <div class="header__actions">
-                <div class="search-box">
+                <button id="mobileSearchBtn" class="header__search-btn" aria-label="検索を開く">🔍</button>
+                <div class="search-box" id="searchBox">
                     <input type="text" id="searchInput" class="search-box__input" placeholder="プロンプトを検索...">
                 </div>
-                <button id="addBtn" class="btn btn--primary">+ 新規登録</button>
+                <button id="addBtn" class="btn btn--primary" aria-label="新規登録">
+                    <span class="btn-icon">+</span>
+                    <span class="btn-text"> 新規登録</span>
+                </button>
             </div>
         </header>
 
         <!-- メインコンテンツ -->
         <main class="main">
+            <div id="sidebarOverlay" class="sidebar-overlay"></div>
             <!-- サイドバー -->
-            <aside class="sidebar">
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar__mobile-header">
+                    <div class="sidebar__logo">🗃️ Prompt Stocker</div>
+                    <button id="closeMenuBtn" class="sidebar__close-btn" aria-label="メニューを閉じる">×</button>
+                </div>
                 <nav class="sidebar__nav">
                     <h2 class="sidebar__title">カテゴリ</h2>
                     <ul class="category-list" id="categoryList">
@@ -75,7 +88,6 @@
                         <button type="button" class="btn btn--secondary btn--small" id="openSettingsBtn">⚙️
                             API設定</button>
                     </div>
-                </div>
             </aside>
 
             <!-- ギャラリー -->
@@ -95,7 +107,7 @@
         <div class="modal__content">
             <div class="modal__header">
                 <h2 class="modal__title" id="modalTitle">新規プロンプト登録</h2>
-                <button class="modal__close" id="closeModal">&times;</button>
+                <button class="modal__close" id="closeModal" data-close-modal>&times;</button>
             </div>
             <form class="modal__body" id="promptForm">
                 <input type="hidden" id="promptId">
@@ -135,7 +147,13 @@
                             <p>📸 画像をドラッグ&ドロップ</p>
                             <p>または</p>
                             <button type="button" class="btn btn--secondary" id="selectImageBtn">ファイルを選択</button>
+                            <button type="button" class="btn btn--accent" id="generateImageBtn">✨ AIで画像を生成</button>
                             <input type="file" id="imageInput" accept="image/*" hidden>
+                        </div>
+                        <div class="image-upload__generating" id="imageGenerating" hidden>
+                            <div class="spinner"></div>
+                            <p>🎨 AIが画像を生成中...</p>
+                            <p class="small">数秒かかる場合があるで、そのまま待ってな</p>
                         </div>
                         <div class="image-upload__preview" id="imagePreview" hidden>
                             <img id="previewImg" src="" alt="プレビュー">
@@ -198,12 +216,23 @@
             <div class="modal__body" style="padding: 24px;">
                 <div class="form-group">
                     <label>Gemini APIキー</label>
-                    <p style="font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 8px;">
+                    <p style="font-size: 0.8rem; color: var(--text-subdued); margin-bottom: 8px;">
                         画像生成機能を使用するにはAPIキーが必要です。
                         <a href="https://aistudio.google.com/app/apikey" target="_blank"
-                            style="color: var(--color-accent);">Google AI Studio</a>で取得できます。
+                            style="color: var(--brand-accent);">Google AI Studio</a>で取得できます。
                     </p>
                     <input type="password" id="apiKeyInput" class="form-control" placeholder="AIza...">
+                </div>
+                <div class="form-group">
+                    <label>画像生成モデル</label>
+                    <select id="aiModelSelect" class="form-control">
+                        <option value="gemini-2.5-flash-image">Gemini 2.5 Flash Image (Nano Banana)</option>
+                        <option value="gemini-3-pro-image-preview">Gemini 3 Pro Image (Nano Banana Pro)</option>
+                    </select>
+                    <p style="font-size: 0.75rem; color: var(--text-subdued); margin-top: 4px;">
+                        ※ Flash (Nano Banana) は高速で安定しています。<br>
+                        ※ Pro (Nano Banana Pro) は高品質ですが、アクセス制限がある場合があります。
+                    </p>
                 </div>
                 <div class="form-group" style="display: flex; gap: 8px; align-items: center;">
                     <button type="button" class="btn btn--primary" id="saveApiKeyBtn">💾 保存</button>
