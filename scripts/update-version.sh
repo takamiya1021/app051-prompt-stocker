@@ -15,8 +15,9 @@ fi
 
 echo "Updating version to: $VERSION"
 
-# index.htmlのバージョン表記を更新（プレースホルダー方式）
+# バージョン表記を更新（プレースホルダー方式）
 # __VERSION__ を実際のバージョンに置換
 sed -i "s/__VERSION__/${VERSION}/g" index.html
+sed -i "s/__VERSION__/${VERSION}/g" sw.js
 
 echo "Version updated successfully!"
