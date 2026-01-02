@@ -422,7 +422,8 @@ body {
 .gallery {
     flex: 1;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(336px, 1fr));
+    /* 280 * 1.2 = 336 */
     gap: 20px;
     align-content: start;
     align-items: start;
@@ -517,8 +518,9 @@ body {
 }
 
 .prompt-card__image {
-    width: 96px;
-    height: 96px;
+    width: 116px;
+    /* 96 * 1.2 = 115.2 */
+    height: 116px;
     object-fit: cover;
     border-radius: var(--radius-sm);
     background-color: var(--bg-elevated);
