@@ -96,13 +96,20 @@ html[data-theme="light"] {
     padding: 0;
 }
 
+html,
+body {
+    height: 100%;
+    overscroll-behavior-y: none;
+    /* Prevent bounce/scroll wiggle */
+}
+
 body {
     font-family: 'Circular Std', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     /* Spotify-like fonts */
     background-color: var(--bg-base);
     color: var(--text-primary);
     line-height: 1.6;
-    min-height: 100vh;
+    min-height: 100%;
     -webkit-font-smoothing: antialiased;
 }
 
@@ -130,7 +137,7 @@ body {
 .app {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    min-height: 100%;
     /* Ambient Gradient Background */
     background: linear-gradient(180deg, rgba(0, 0, 0, 0.02) 0%, var(--bg-base) 40%);
 }
@@ -1080,13 +1087,6 @@ textarea.form-control {
     margin-bottom: 24px;
 }
 
-.app-container {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    background-color: var(--bg-primary);
-    color: var(--text-primary);
-}
 
 .form-group label {
     display: block;
@@ -1257,23 +1257,38 @@ textarea.form-control {
 
 /* Toasts */
 .toast {
-    background: #2E77D0;
-    /* Spotify Blue for info/success sometimes, or Green */
-    color: #fff;
-    border-radius: 4px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    border: none;
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 24px;
+    background: rgba(255, 255, 255, 0.95);
+    color: #000;
+    border-radius: 8px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
     font-weight: 500;
 }
 
+.toast.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
 .toast.success {
-    background: var(--brand-accent);
-    color: #000;
+    border-bottom: 3px solid var(--color-success);
 }
 
 .toast.error {
-    background: var(--text-negative);
-    color: #fff;
+    border-bottom: 3px solid var(--color-danger);
 }
 
 /* Responsive adjustments */
@@ -1368,23 +1383,6 @@ textarea.form-control {
     animation: heartBeat 1s;
 }
 
-/* 5. Rich Toast Notification */
-.toast {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: rgba(255, 255, 255, 0.95);
-    border-left: none;
-    border-bottom: 3px solid transparent;
-}
-
-.toast.success {
-    border-bottom-color: var(--color-success);
-}
-
-.toast.error {
-    border-bottom-color: var(--color-danger);
-}
 
 
 /* ========================================
