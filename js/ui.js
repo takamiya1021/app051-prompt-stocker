@@ -59,11 +59,11 @@ const UI = {
         card.innerHTML = `
       <div class="prompt-card__category-badge">${this.CATEGORY_LABELS[prompt.category] || prompt.category}</div>
       <div class="prompt-card__header">
-          <div class="prompt-card__image-container" style="flex: 0 0 50%; max-width: 50%;">
+          <div class="prompt-card__image-container">
               ${imageHtml}
           </div>
-          <div class="prompt-card__meta" style="padding-left: 12px; display: flex; flex-direction: column; justify-content: center;">
-              <div class="prompt-card__title" style="font-weight: 700; font-size: 1.1em;">${this.escapeHtml(prompt.title || '')}</div>
+          <div class="prompt-card__meta">
+              <div class="prompt-card__title">${this.escapeHtml(prompt.title || '')}</div>
           </div>
       </div>
       <div class="prompt-card__body">
