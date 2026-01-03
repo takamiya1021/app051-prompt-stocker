@@ -1,4 +1,4 @@
-const CACHE_NAME = 'prompt-stocker-v20260103-01';
+const CACHE_NAME = 'prompt-stocker-v20260103-02';
 const ASSETS = [
     './',
     './index.html',
