@@ -42,8 +42,8 @@ export async function generateImage(prompt) {
             model: selectedModel
         };
 
-        // Nano Banana (Flash) の場合は画像生成を強制するために responseModalities を指定
-        if (selectedModel === 'gemini-2.5-flash-image') {
+        // 画像生成モデルの場合は画像生成を強制するために responseModalities を指定
+        if (selectedModel === 'gemini-2.5-flash-image' || selectedModel === 'gemini-3-pro-image-preview') {
             modelOptions.generationConfig = {
                 responseModalities: ['IMAGE']
             };
@@ -51,7 +51,10 @@ export async function generateImage(prompt) {
 
         const model = genAI.getGenerativeModel(modelOptions);
 
-        const result = await model.generateContent(prompt);
+        // タイムアウト設定（30秒）
+        // SDK のバージョンによっては requestOptions が使えるが、安全のために AbortController 的なタイムアウトを考慮
+        // ここでは SDK 標準の requestOptions を試みる
+        const result = await model.generateContent(prompt, { timeout: 45000 });
         const response = result.response;
 
         // レスポンスから画像データを取得
@@ -95,6 +98,12 @@ export async function generateImage(prompt) {
         }
         if (error.message.includes('429')) {
             throw new Error('レート制限に達しました。しばらく待ってから再試行してください。');
+        }
+        if (error.message.includes('timeout') || error.message.includes('Deadline') || error.message.includes('operation was aborted')) {
+            throw new Error('生成がタイムアウトしました。プロンプトが複雑すぎるか、プロモデル（Gemini 3 Pro）が指示の処理に苦戦している可能性があります。ゲームの仕様などではなく、描きたい「絵」の見た目の特徴を中心に短くまとめてみてください。');
+        }
+        if (error.message.includes('finishReason')) {
+            throw new Error('画像の生成に失敗しました（安全フィルターや規約による制限の可能性があります）。別の表現を試してください。');
         }
 
         throw error;

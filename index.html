@@ -151,6 +151,10 @@
                             <button type="button" class="btn btn--accent" id="generateImageBtn">✨ AIで画像を生成</button>
                             <input type="file" id="imageInput" accept="image/*" hidden>
                         </div>
+                        <div id="apiKeyWarning" class="api-key-warning" hidden>
+                            <span class="warning-icon">⚠️</span>
+                            <span class="warning-text">APIキーが未設定です。「API設定」から登録してください。</span>
+                        </div>
                         <div class="image-upload__generating" id="imageGenerating" hidden>
                             <div class="spinner"></div>
                             <p>🎨 AIが画像を生成中...</p>

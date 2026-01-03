@@ -1,4 +1,4 @@
-const CACHE_NAME = 'prompt-stocker-__VERSION__';
+const CACHE_NAME = 'prompt-stocker-v20260103-01';
 const ASSETS = [
     './',
     './index.html',
@@ -60,7 +60,7 @@ self.addEventListener('fetch', (event) => {
                                 cache.put(event.request, response);
                             });
                         }
-                    }).catch(() => {})
+                    }).catch(() => { })
                 );
                 return cachedResponse;
             }

@@ -129,7 +129,9 @@ const App = {
             mobileSearchBtn: document.getElementById('mobileSearchBtn'), // New
             searchBox: document.querySelector('.search-box'), // Make sure this targets the wrapper
             sidebar: document.getElementById('sidebar'),
-            sidebarOverlay: document.getElementById('sidebarOverlay')
+            sidebarOverlay: document.getElementById('sidebarOverlay'),
+            apiKeyWarning: document.getElementById('apiKeyWarning'),
+            generateImageBtn: document.getElementById('generateImageBtn')
         };
     },
 
@@ -152,10 +154,12 @@ const App = {
         const cancelBtn = document.getElementById('cancelBtn');
         if (cancelBtn) cancelBtn.addEventListener('click', () => UI.closeModal('editModal'));
 
-        // モーダル背景クリックで閉じる
+        // モーダル背景クリックで閉じる（お嬢の指示により無効化：保存またはキャンセルを必須にする）
+        /*
         document.querySelectorAll('.modal__backdrop').forEach(backdrop => {
             backdrop.addEventListener('click', () => UI.closeAllModals());
         });
+        */
 
         // フォーム送信
         if (this.elements.promptForm) {
@@ -434,6 +438,9 @@ const App = {
                         setTimeout(() => { apiKeyStatus.textContent = ''; }, 3000);
                     }
                     if (typeof UI !== 'undefined') UI.showToast('⚙️ 設定を保存しました');
+
+                    // 編集モーダルが開いている場合は警告を更新
+                    this.updateApiKeyWarning();
                 }
             });
         }
@@ -449,6 +456,8 @@ const App = {
                     setTimeout(() => { apiKeyStatus.textContent = ''; }, 3000);
                 }
                 if (typeof UI !== 'undefined') UI.showToast('APIキーを削除しました');
+                // 編集モーダルが開いている場合は警告を更新
+                this.updateApiKeyWarning();
             });
         }
 
@@ -456,12 +465,22 @@ const App = {
         const generateImageBtn = document.getElementById('generateImageBtn');
         if (generateImageBtn) {
             generateImageBtn.addEventListener('click', async () => {
-                const promptText = this.elements.promptText?.value;
+                const textarea = this.elements.promptText;
+                let basePrompt = textarea?.value;
 
-                if (!promptText || promptText.trim() === '') {
+                // 文字が選択されている場合はその範囲のみを使用
+                const hasSelection = textarea && textarea.selectionStart !== textarea.selectionEnd;
+                if (hasSelection) {
+                    basePrompt = textarea.value.slice(textarea.selectionStart, textarea.selectionEnd);
+                }
+
+                if (!basePrompt || basePrompt.trim() === '') {
                     if (typeof UI !== 'undefined') UI.showToast('プロンプトを入力してください', 'error');
                     return;
                 }
+
+                // 常にお嬢のリクエスト通り「イメージとして捉える」指示を付与
+                const promptToUse = `次のプロンプトの内容を1つのイメージとしてとらえて画像化してください：\n${basePrompt}`;
 
                 if (!localStorage.getItem('gemini_api_key')) {
                     if (typeof UI !== 'undefined') UI.showToast('APIキーを設定してください', 'error');
@@ -477,11 +496,12 @@ const App = {
                 try {
                     // 動的インポートで画像生成モジュールを読み込み
                     const { generateImage } = await import('./imageGen.js');
-                    const blob = await generateImage(promptText);
+                    const blob = await generateImage(promptToUse);
 
                     // プレビューに表示
                     this.showImagePreview(blob);
-                    if (typeof UI !== 'undefined') UI.showToast('🎨 画像を生成しました！');
+                    const toastMsg = hasSelection ? '🎨 選択範囲から画像を生成しました！' : '🎨 画像を生成しました！';
+                    if (typeof UI !== 'undefined') UI.showToast(toastMsg);
 
                 } catch (error) {
                     console.error('画像生成エラー:', error);
@@ -667,7 +687,24 @@ const App = {
         // タグの補完リストを更新
         this.updateTagSuggestions();
 
+        // APIキーの警告表示を更新
+        this.updateApiKeyWarning();
+
         if (typeof UI !== 'undefined') UI.openModal('editModal');
+    },
+
+    /**
+     * APIキーの警告表示を更新
+     */
+    updateApiKeyWarning() {
+        const hasKey = !!localStorage.getItem('gemini_api_key');
+        if (this.elements.apiKeyWarning) {
+            this.elements.apiKeyWarning.hidden = hasKey;
+        }
+        if (this.elements.generateImageBtn) {
+            this.elements.generateImageBtn.disabled = !hasKey;
+            this.elements.generateImageBtn.title = hasKey ? '' : 'APIキーを設定してください';
+        }
     },
 
     /**

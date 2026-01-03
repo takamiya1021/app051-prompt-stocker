@@ -57,10 +57,14 @@
     --transition-base: 0.3s cubic-bezier(0.3, 0, 0, 1);
     --transition-highlight: 0.1s ease-in;
     --transition-fast: 0.1s ease;
+
+    /* Browser UI Adaptation */
+    color-scheme: dark;
 }
 
 /* CSS Variables - Light Mode Overrides */
 html[data-theme="light"] {
+    color-scheme: light;
     --bg-base: #F0F2F5;
     --bg-surface: #FFFFFF;
     --bg-card: #FFFFFF;
@@ -1032,6 +1036,18 @@ body {
     color: var(--text-primary);
 }
 
+.form-control option {
+    background-color: #282828;
+    /* Explicit dark background */
+    color: #FFFFFF;
+    /* Explicit white text */
+}
+
+/* Ensure select itself has visible text in focus/active states */
+select.form-control {
+    color: #FFFFFF !important;
+}
+
 textarea.form-control {
     min-height: 120px;
     resize: vertical;
@@ -1108,6 +1124,27 @@ textarea.form-control {
     border-color: var(--brand-accent);
     background: var(--bg-elevated);
     color: var(--text-primary);
+}
+
+.api-key-warning {
+    margin-top: 12px;
+    padding: 10px 16px;
+    background-color: rgba(255, 164, 43, 0.1);
+    border-left: 3px solid var(--text-warning);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.api-key-warning .warning-icon {
+    font-size: 1.2rem;
+}
+
+.api-key-warning .warning-text {
+    font-size: 0.85rem;
+    color: var(--text-warning);
+    font-weight: 500;
 }
 
 .image-upload__preview {
@@ -1631,6 +1668,7 @@ textarea.form-control {
         flex-direction: column;
     }
 }
+
 /* ========================================
    PWA Update Notification Banner
    ======================================== */
@@ -1729,8 +1767,15 @@ html[data-theme="light"] .update-banner__dismiss:hover {
 
 
 @keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-4px); }
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-4px);
+    }
 }
 
 /* Dark mode adjustments */
