@@ -465,7 +465,8 @@ body {
     position: relative;
     /* For Absolute Badge */
     min-height: 120px;
-    /* Ensure height for image + padding */
+    min-width: 320px;
+    /* Strict lower bound to prevent overlap */
 }
 
 /* Category Badge (Top Right) */
@@ -1248,7 +1249,7 @@ textarea.form-control {
     border-top: 1px solid var(--border-subdued);
 }
 
-@media (max-width: 700px) {
+@media (max-width: 1024px) {
     .detail-view {
         grid-template-columns: 1fr;
     }
@@ -1433,7 +1434,7 @@ textarea.form-control {
 }
 
 /* Mobile Styles */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
 
     /* 1. Show Hamburger */
     .header__menu-btn {
