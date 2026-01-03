@@ -1676,7 +1676,7 @@ textarea.form-control {
     position: fixed;
     bottom: 20px;
     left: 50%;
-    transform: translateX(-50%) translateY(100px);
+    transform: translateX(-50%) translateY(calc(100% + 40px));
     background-color: var(--bg-elevated);
     border: 1px solid var(--border-subdued);
     border-radius: 12px;
@@ -1789,7 +1789,7 @@ html[data-theme="light"] .update-banner {
         left: 12px;
         right: 12px;
         bottom: 16px;
-        transform: translateY(100px);
+        transform: translateY(calc(100% + 40px));
         width: auto;
         min-width: 0;
         /* Reset min-width for small screens */
