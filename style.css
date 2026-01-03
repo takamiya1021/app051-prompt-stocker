@@ -1744,7 +1744,16 @@ textarea.form-control {
 .update-banner__text {
     font-size: 0.95rem;
     font-weight: 500;
+    line-height: 1.4;
     color: var(--text-primary);
+}
+
+.update-banner__changelog {
+    display: inline;
+    margin-left: 4px;
+    font-size: 0.9rem;
+    color: #e0e0e0;
+    /* Light grey for contrast */
 }
 
 .update-banner__actions {

@@ -18,7 +18,8 @@ else
     echo "Using fallback: $VERSION"
 fi
 
-echo "Updating version to: $VERSION"
+# Changelog（第1引数、または環境変数から取得）
+CHANGELOG=${1:-${CHANGELOG:-"OSの安定性向上と細かな修正"}}
 
 # バージョン表記を更新（プレースホルダーまたは既存のバージョンを置換）
 # __VERSION__ または v[0-9].* または v[SHA] を置換
@@ -26,8 +27,13 @@ echo "Updating version to: $VERSION"
 sed -i "s/__VERSION__/${VERSION}/g" index.html
 sed -i "s/sidebar__version\">v[^\<]*/sidebar__version\">v${VERSION}/g" index.html
 
+# Changelogを更新（プレースホルダーまたは既存の文言を置換）
+sed -i "s/__CHANGELOG__/${CHANGELOG}/g" index.html
+# 二回目以降の置換（__CHANGELOG__が消えている場合）に対応
+sed -i "s/update-banner__changelog\">: [^\<]*/update-banner__changelog\">: ${CHANGELOG}/g" index.html
+
 # sw.js の const CACHE_NAME = 'prompt-stocker-...'; 部分を置換
 sed -i "s/__VERSION__/${VERSION}/g" sw.js
 sed -i "s/prompt-stocker-[^\']*/prompt-stocker-${VERSION}/g" sw.js
 
-echo "Version updated successfully to ${VERSION}!"
+echo "Version updated successfully to ${VERSION} with changelog: ${CHANGELOG}"
