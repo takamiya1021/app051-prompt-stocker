@@ -219,8 +219,8 @@ body {
     width: var(--sidebar-width);
     /* Guarantee height spans the rest of the viewport */
     height: calc(100vh - var(--header-height));
-    background-color: var(--bg-press);
-    /* Sidebar is darker/lighter */
+    display: flex;
+    flex-direction: column;
     padding: 12px 10px;
     overflow-y: auto;
     flex-shrink: 0;
@@ -1397,6 +1397,19 @@ textarea.form-control {
 .sidebar-overlay.active {
     opacity: 1;
     visibility: visible;
+}
+
+.sidebar__footer {
+    margin-top: auto;
+    padding: 16px 4px 8px;
+    border-top: 1px solid var(--border-subdued);
+}
+
+.sidebar__version {
+    font-size: 0.7rem;
+    color: var(--text-subdued);
+    font-family: inherit;
+    opacity: 0.8;
 }
 
 /* Mobile Styles */
