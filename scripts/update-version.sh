@@ -20,9 +20,14 @@ fi
 
 echo "Updating version to: $VERSION"
 
-# バージョン表記を更新（プレースホルダー方式）
-# __VERSION__ を実際のバージョンに置換
+# バージョン表記を更新（プレースホルダーまたは既存のバージョンを置換）
+# __VERSION__ または v[0-9].* または v[SHA] を置換
+# index.html の <div class="sidebar__version">v...</div> 部分を置換
 sed -i "s/__VERSION__/${VERSION}/g" index.html
-sed -i "s/__VERSION__/${VERSION}/g" sw.js
+sed -i "s/sidebar__version\">v[^\<]*/sidebar__version\">v${VERSION}/g" index.html
 
-echo "Version updated successfully!"
+# sw.js の const CACHE_NAME = 'prompt-stocker-...'; 部分を置換
+sed -i "s/__VERSION__/${VERSION}/g" sw.js
+sed -i "s/prompt-stocker-[^\']*/prompt-stocker-${VERSION}/g" sw.js
+
+echo "Version updated successfully to ${VERSION}!"
